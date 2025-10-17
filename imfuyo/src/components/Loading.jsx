@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { Moon, Sun, Leaf } from 'lucide-react';
 
-const Loading = () => {
+const Loading = ({ lottieLoaded }) => {
   const [isDark, setIsDark] = useState(false);
   const [flicker, setFlicker] = useState(false);
+  const [showFallback, setShowFallback] = useState(false);
 
   // Flicker effect
   useEffect(() => {
@@ -13,8 +14,18 @@ const Loading = () => {
       setTimeout(() => setFlicker(false), 300);
     }, 2000);
 
-    return () => clearInterval(flickerInterval);
-  }, []);
+    // Show fallback if Lottie doesn't load within 3 seconds
+    const fallbackTimer = setTimeout(() => {
+      if (!lottieLoaded) {
+        setShowFallback(true);
+      }
+    }, 3000);
+
+    return () => {
+      clearInterval(flickerInterval);
+      clearTimeout(fallbackTimer);
+    };
+  }, [lottieLoaded]);
 
   return (
     <div className={`min-h-screen w-full transition-all duration-700 overflow-hidden ${
@@ -73,15 +84,29 @@ const Loading = () => {
           </span>
         </div>
 
-        {/* Lottie Animation - Larger and Centered */}
+        {/* Lottie Animation - With Preload Handling */}
         <div className="flex-1 flex items-center justify-center w-full max-w-4xl lg:max-w-6xl">
           <div className="relative w-full h-64 lg:h-96">
-            <DotLottieReact
-              src="https://lottie.host/68638530-e1e4-49f9-952a-1c3efcd7aeac/2hywu50vnf.lottie"
-              loop
-              autoplay
-              className="w-full h-full"
-            />
+            {!showFallback ? (
+              <DotLottieReact
+                src="https://lottie.host/68638530-e1e4-49f9-952a-1c3efcd7aeac/2hywu50vnf.lottie"
+                loop
+                autoplay
+                className="w-full h-full"
+                onEvent={(event) => {
+                  if (event === 'load') {
+                    console.log('Lottie loaded successfully');
+                  }
+                }}
+              />
+            ) : (
+              // Fallback animation if Lottie fails to load
+              <div className="w-full h-full flex items-center justify-center">
+                <div className={`w-32 h-32 rounded-full border-4 border-t-transparent animate-spin ${
+                  isDark ? 'border-green-400' : 'border-green-600'
+                }`}></div>
+              </div>
+            )}
             
             {/* Glow Effect */}
             <div className={`absolute inset-0 rounded-full blur-3xl opacity-30 -z-10 ${
@@ -148,6 +173,15 @@ const Loading = () => {
 
         .animate-bounce {
           animation: bounce 1.2s infinite ease-in-out;
+        }
+
+        /* Ensure Lottie container is properly sized */
+        .lottie-container {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
       `}</style>
     </div>
