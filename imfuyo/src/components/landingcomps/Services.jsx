@@ -1,17 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronRight, ArrowRight } from 'lucide-react';
-import Navbar from './Navbar';
 
 const Services = ({ 
   isActive, 
   transformClass, 
   parallaxOffset, 
   isDark, 
-  setActiveSection, 
-  mobileMenuOpen, 
-  setMobileMenuOpen, 
-  activeSection, 
-  setIsDark 
+  setActiveSection,
+  hideNavbar
 }) => {
   const [currentService, setCurrentService] = useState(0);
   const [autoSwitch, setAutoSwitch] = useState(true);
@@ -100,18 +96,6 @@ const Services = ({
           }`} style={{ animation: 'drift 10s ease-in-out infinite', animationDelay: '-2s' }}></div>
         </div>
 
-        {/* Navbar */}
-        <div className="relative z-10">
-          <Navbar 
-            isDark={isDark}
-            setIsDark={setIsDark}
-            mobileMenuOpen={mobileMenuOpen}
-            setMobileMenuOpen={setMobileMenuOpen}
-            activeSection={activeSection}
-            setActiveSection={setActiveSection}
-          />
-        </div>
-
         {/* Background Gradient - Subtle */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
           <div className={`absolute inset-0 ${
@@ -139,8 +123,8 @@ const Services = ({
           ))}
         </div>
 
-        {/* Main Content - Full Height */}
-        <div className="relative z-20 flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Main Content - Full Height with top padding for fixed navbar */}
+        <div className="relative z-20 flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 overflow-hidden pt-20 sm:pt-24">
           <div className="w-full h-full max-w-7xl mx-auto flex flex-col justify-between">
 
             {/* Service Display - Grid with Image Container */}

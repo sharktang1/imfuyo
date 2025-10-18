@@ -1,5 +1,5 @@
 import React from 'react';
-import { Leaf, X, ArrowRight, Moon, Sun, Menu } from 'lucide-react';
+import { X, ArrowRight, Moon, Sun, Menu } from 'lucide-react';
 
 const Navbar = ({ 
   isHero = false, 
@@ -36,13 +36,12 @@ const Navbar = ({
     <nav className="w-full relative z-50 pointer-events-auto" style={{ userSelect: 'auto' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
-          <div className="flex items-center space-x-2 sm:space-x-3 group cursor-pointer">
-            <div className="relative">
-              <div className="absolute inset-0 bg-[#74c69d] rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity"></div>
-              <div className="relative bg-gradient-to-br from-[#74c69d] to-[#95d5b2] p-2 sm:p-3 rounded-2xl transform group-hover:scale-110 transition-transform duration-300">
-                <Leaf className="w-4 h-4 sm:w-6 sm:h-6 text-white" strokeWidth={2.5} />
-              </div>
-            </div>
+          <div className="flex items-center space-x-3 sm:space-x-4 group cursor-pointer">
+            <img 
+              src="https://res.cloudinary.com/dpymwa41m/image/upload/v1760774001/Facebook1_jjvwsz.jpg" 
+              alt="Imfuyo Logo" 
+              className="w-16 h-16 sm:w-20 sm:h-20 transform group-hover:scale-110 transition-transform duration-300"
+            />
             <span className="text-xl sm:text-2xl font-bold tracking-tight" style={{ fontFamily: "'Outfit', sans-serif", color: '#6E260E' }}>
               Imfuyo
             </span>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import { Moon, Sun, Leaf } from 'lucide-react';
+import { Moon, Sun } from 'lucide-react';
 
 const Loading = ({ lottieLoaded }) => {
   const [isDark, setIsDark] = useState(false);
@@ -63,16 +63,11 @@ const Loading = ({ lottieLoaded }) => {
         
         {/* Logo/Brand */}
         <div className="absolute top-8 left-8 flex items-center space-x-3 group cursor-pointer">
-          <div className="relative">
-            <div className={`absolute inset-0 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity ${
-              isDark ? 'bg-green-700' : 'bg-green-300'
-            }`}></div>
-            <div className={`relative p-3 rounded-2xl transform group-hover:scale-110 transition-transform duration-300 ${
-              isDark ? 'bg-gradient-to-br from-green-700 to-emerald-800' : 'bg-gradient-to-br from-green-400 to-emerald-500'
-            }`}>
-              <Leaf className="w-6 h-6 text-white" strokeWidth={2.5} />
-            </div>
-          </div>
+          <img 
+            src="https://res.cloudinary.com/dpymwa41m/image/upload/v1760774001/Facebook1_jjvwsz.jpg" 
+            alt="Imfuyo Logo" 
+            className="w-10 h-10 sm:w-12 sm:h-12 transform group-hover:scale-110 transition-transform duration-300"
+          />
           <span 
             className="text-2xl font-bold tracking-tight transition-all duration-500"
             style={{ 

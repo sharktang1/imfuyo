@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight } from 'lucide-react';
-import Navbar from './Navbar';
+import { ArrowRight, Users, Sparkles } from 'lucide-react';
 
-const Hero = ({ isActive, transformClass, parallaxOffset, isDark, mobileMenuOpen, setMobileMenuOpen, activeSection, setActiveSection, setIsDark }) => {
+const Hero = ({ isActive, transformClass, parallaxOffset, hideNavbar }) => {
   const [textVisible, setTextVisible] = useState(false);
   const [typedText, setTypedText] = useState('');
   const fullText = "An AgriFintech Merging agriculture with modern Data driven analytics and technologies.";
@@ -48,19 +47,6 @@ const Hero = ({ isActive, transformClass, parallaxOffset, isDark, mobileMenuOpen
           ></div>
         </div>
 
-        {/* Navbar integrated in hero */}
-        <div className="relative z-50">
-          <Navbar 
-            isHero={true} 
-            isDark={isDark}
-            setIsDark={setIsDark}
-            mobileMenuOpen={mobileMenuOpen}
-            setMobileMenuOpen={setMobileMenuOpen}
-            activeSection={activeSection}
-            setActiveSection={setActiveSection}
-          />
-        </div>
-
         {/* Hero Content */}
         <div className="relative flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 pointer-events-none">
           <div className="max-w-6xl mx-auto text-center w-full">
@@ -86,11 +72,13 @@ const Hero = ({ isActive, transformClass, parallaxOffset, isDark, mobileMenuOpen
 
               <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4 mt-12 sm:mt-16 pointer-events-auto">
                 <button className="group flex items-center justify-center space-x-2 bg-[#f8f9fa] text-[#2d6a4f] px-6 py-3 sm:px-8 sm:py-4 rounded-full font-bold hover:bg-[#95d5b2] hover:text-[#1b4332] transition-all duration-300 shadow-2xl hover:scale-105 transform w-full sm:w-auto text-sm sm:text-base" style={{ fontFamily: "'Outfit', sans-serif" }}>
-                  <span>Explore Solutions</span>
+                  <Users className="w-5 h-5" />
+                  <span>Blog & Community</span>
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
-                <button className="px-6 py-3 sm:px-8 sm:py-4 text-[#f8f9fa] font-bold rounded-full border-2 border-[#f8f9fa]/40 hover:bg-white/15 hover:border-[#f8f9fa]/60 transition-all duration-300 backdrop-blur-sm w-full sm:w-auto text-sm sm:text-base" style={{ fontFamily: "'Outfit', sans-serif" }}>
-                  Learn More
+                <button className="group flex items-center justify-center space-x-2 px-6 py-3 sm:px-8 sm:py-4 text-[#f8f9fa] font-bold rounded-full border-2 border-[#f8f9fa]/40 hover:bg-white/15 hover:border-[#f8f9fa]/60 transition-all duration-300 backdrop-blur-sm w-full sm:w-auto text-sm sm:text-base" style={{ fontFamily: "'Outfit', sans-serif" }}>
+                  <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                  <span>AI Consultation</span>
                 </button>
               </div>
             </div>

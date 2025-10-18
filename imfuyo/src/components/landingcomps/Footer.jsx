@@ -1,5 +1,5 @@
 import React from 'react';
-import { Leaf, Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram } from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram } from 'lucide-react';
 
 const Footer = ({ isActive, transformClass, setActiveSection }) => {
   const navItems = [
@@ -25,9 +25,11 @@ const Footer = ({ isActive, transformClass, setActiveSection }) => {
                 {/* Brand Column */}
                 <div>
                   <div className="flex items-center space-x-3 mb-4">
-                    <div className="bg-gradient-to-br from-[#74c69d] to-[#95d5b2] p-3 rounded-2xl">
-                      <Leaf className="w-6 h-6 text-white" strokeWidth={2.5} />
-                    </div>
+                    <img 
+                      src="https://res.cloudinary.com/dpymwa41m/image/upload/v1760774001/Facebook1_jjvwsz.jpg" 
+                      alt="Imfuyo Logo" 
+                      className="w-10 h-10 sm:w-12 sm:h-12"
+                    />
                     <span className="text-2xl font-bold" style={{ fontFamily: "'Outfit', sans-serif", color: '#6E260E' }}>
                       Imfuyo
                     </span>

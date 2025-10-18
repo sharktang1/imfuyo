@@ -1,11 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import LandingPage from './components/LandingPage';
+import AboutPage from './components/AboutPage';
 import Loading from './components/Loading';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [lottieLoaded, setLottieLoaded] = useState(false);
+  
+  // Initialize currentPage from localStorage or default to 'landing'
+  const [currentPage, setCurrentPage] = useState(() => {
+    const savedPage = localStorage.getItem('currentPage');
+    return savedPage || 'landing';
+  });
+  
+  const [isDark, setIsDark] = useState(() => {
+    const savedTheme = localStorage.getItem('isDark');
+    return savedTheme === 'true';
+  });
+  
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
+  // Save currentPage to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('currentPage', currentPage);
+  }, [currentPage]);
+
+  // Save dark mode preference to localStorage
+  useEffect(() => {
+    localStorage.setItem('isDark', isDark);
+  }, [isDark]);
+
+  // Initial load effect
   useEffect(() => {
     const loadEverything = async () => {
       try {
@@ -55,9 +80,62 @@ function App() {
     loadEverything();
   }, []);
 
+  const navigateToAbout = () => {
+    // Show loading screen
+    setIsTransitioning(true);
+    setLottieLoaded(false);
+    
+    // Simulate loading
+    setTimeout(() => {
+      setLottieLoaded(true);
+    }, 500);
+
+    // Navigate after loading
+    setTimeout(() => {
+      setCurrentPage('about');
+      window.scrollTo(0, 0);
+      setIsTransitioning(false);
+    }, 2000);
+  };
+
+  const navigateToHome = () => {
+    // Show loading screen
+    setIsTransitioning(true);
+    setLottieLoaded(false);
+    
+    // Simulate loading
+    setTimeout(() => {
+      setLottieLoaded(true);
+    }, 500);
+
+    // Navigate after loading
+    setTimeout(() => {
+      setCurrentPage('landing');
+      window.scrollTo(0, 0);
+      setIsTransitioning(false);
+    }, 2000);
+  };
+
+  // Show loading screen for initial load or transitions
+  if (isLoading || isTransitioning) {
+    return <Loading lottieLoaded={lottieLoaded} />;
+  }
+
   return (
     <div className="App">
-      {isLoading ? <Loading lottieLoaded={lottieLoaded} /> : <LandingPage />}
+      {currentPage === 'landing' ? (
+        <LandingPage 
+          isDark={isDark} 
+          setIsDark={setIsDark}
+          onNavigateToAbout={navigateToAbout}
+        />
+      ) : (
+        <AboutPage 
+          isDark={isDark}
+          setIsDark={setIsDark}
+          onBack={navigateToHome}
+        />
+      )}
     </div>
   );
 }

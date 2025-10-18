@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { ArrowRight } from 'lucide-react';
-import Navbar from './Navbar';
 
 const About = ({ 
   isActive, 
@@ -9,10 +8,8 @@ const About = ({
   parallaxOffset, 
   isDark, 
   setActiveSection, 
-  mobileMenuOpen, 
-  setMobileMenuOpen, 
-  activeSection, 
-  setIsDark 
+  hideNavbar,
+  onNavigateToAbout // Add this prop
 }) => {
   const [inView, setInView] = useState(false);
   const [buttonPulse, setButtonPulse] = useState(false);
@@ -43,6 +40,12 @@ const About = ({
     return () => clearInterval(interval);
   }, []);
 
+  const handleKnowUsClick = () => {
+    if (onNavigateToAbout) {
+      onNavigateToAbout();
+    }
+  };
+
   return (
     <div 
       className={`absolute inset-0 transition-all duration-1000 ease-out ${transformClass}`}
@@ -55,18 +58,6 @@ const About = ({
             : 'bg-gradient-to-br from-[#fafaf9] via-[#f8f9fa] to-[#f0fdf4]'
         }`}
       >
-        {/* Navbar */}
-        <div className="relative z-10">
-          <Navbar 
-            isDark={isDark}
-            setIsDark={setIsDark}
-            mobileMenuOpen={mobileMenuOpen}
-            setMobileMenuOpen={setMobileMenuOpen}
-            activeSection={activeSection}
-            setActiveSection={setActiveSection}
-          />
-        </div>
-
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className={`absolute -top-32 right-1/4 w-96 h-96 rounded-full blur-3xl opacity-25 ${
@@ -77,8 +68,8 @@ const About = ({
           }`} style={{ animation: 'drift 10s ease-in-out infinite', animationDelay: '-2s' }}></div>
         </div>
 
-        {/* Main Content Container */}
-        <div className="relative z-20 flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+        {/* Main Content Container - Added top padding for fixed navbar */}
+        <div className="relative z-20 flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24">
           <div className="w-full max-w-7xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-6 items-center h-full">
               
@@ -142,6 +133,7 @@ const About = ({
                   inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
                 }`}>
                   <button 
+                    onClick={handleKnowUsClick}
                     className={`group relative inline-flex items-center space-x-2 px-7 sm:px-8 py-3 sm:py-3.5 rounded-full font-semibold text-white overflow-hidden transition-all duration-300 ${
                       buttonPulse ? 'scale-105 shadow-xl' : 'scale-100 shadow-lg'
                     }`}

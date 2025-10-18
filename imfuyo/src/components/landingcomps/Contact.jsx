@@ -1,17 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { Facebook, Linkedin, Instagram, Phone, Mail, Send, MapPin, X } from 'lucide-react';
-import Navbar from './Navbar';
 
 const Contact = ({ 
   isActive, 
   transformClass, 
   isDark, 
-  setActiveSection, 
-  mobileMenuOpen, 
-  setMobileMenuOpen, 
-  activeSection, 
-  setIsDark 
+  setActiveSection,
+  hideNavbar
 }) => {
   const [inView, setInView] = useState(false);
   const [hoveredSocial, setHoveredSocial] = useState(null);
@@ -113,18 +109,6 @@ const Contact = ({
           isDark ? 'bg-gray-900' : 'bg-gradient-to-br from-[#f8f9fa] to-[#e9ecef]'
         }`}
       >
-        {/* Navbar */}
-        <div className="relative z-10">
-          <Navbar 
-            isDark={isDark}
-            setIsDark={setIsDark}
-            mobileMenuOpen={mobileMenuOpen}
-            setMobileMenuOpen={setMobileMenuOpen}
-            activeSection={activeSection}
-            setActiveSection={setActiveSection}
-          />
-        </div>
-
         {/* Animated Background Blobs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className={`absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl opacity-20 ${
@@ -138,8 +122,8 @@ const Contact = ({
           }`}></div>
         </div>
 
-        {/* Main Content Container */}
-        <div className="relative z-20 flex-1 w-full max-w-6xl px-4 sm:px-6 lg:px-8 mx-auto flex items-center">
+        {/* Main Content Container - Added top padding for fixed navbar */}
+        <div className="relative z-20 flex-1 w-full max-w-6xl px-4 sm:px-6 lg:px-8 mx-auto flex items-center pt-20 sm:pt-24">
           {/* Unified Card Container */}
           <div className={`w-full transform transition-all duration-1000 delay-200 ${
             inView ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
