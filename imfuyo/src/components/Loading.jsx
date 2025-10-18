@@ -34,13 +34,13 @@ const Loading = ({ lottieLoaded }) => {
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className={`absolute top-1/4 left-1/4 w-64 h-64 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse ${
-          isDark ? 'bg-green-800' : 'bg-green-300'
+          isDark ? 'bg-green-500' : 'bg-green-300'
         }`}></div>
         <div className={`absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full mix-blend-multiply filter blur-xl opacity-15 animate-pulse ${
-          isDark ? 'bg-emerald-900' : 'bg-emerald-200'
+          isDark ? 'bg-emerald-500' : 'bg-emerald-200'
         }`} style={{ animationDelay: '2s' }}></div>
         <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full mix-blend-multiply filter blur-2xl opacity-10 animate-pulse ${
-          isDark ? 'bg-teal-800' : 'bg-teal-100'
+          isDark ? 'bg-teal-500' : 'bg-teal-100'
         }`} style={{ animationDelay: '4s' }}></div>
       </div>
 
@@ -109,8 +109,8 @@ const Loading = ({ lottieLoaded }) => {
             )}
             
             {/* Glow Effect */}
-            <div className={`absolute inset-0 rounded-full blur-3xl opacity-30 -z-10 ${
-              isDark ? 'bg-green-600' : 'bg-green-400'
+            <div className={`absolute inset-0 rounded-full blur-3xl opacity-30 -z-10 transition-all duration-500 ${
+              isDark ? 'bg-green-500 shadow-2xl shadow-green-500/50' : 'bg-green-400'
             }`}></div>
           </div>
         </div>

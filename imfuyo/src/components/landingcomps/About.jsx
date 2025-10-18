@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { ArrowRight } from 'lucide-react';
 import Navbar from './Navbar';
 
@@ -13,52 +14,33 @@ const About = ({
   activeSection, 
   setIsDark 
 }) => {
-  const [imagePositions, setImagePositions] = useState({ top: false, bottom: false });
   const [inView, setInView] = useState(false);
+  const [buttonPulse, setButtonPulse] = useState(false);
   const aboutRef = useRef(null);
-  const imageContainerRef = useRef(null);
 
-  // Scroll animation for images - bringing cards together and dispersing
   useEffect(() => {
     const handleScroll = () => {
       const aboutSection = aboutRef.current;
       if (!aboutSection) return;
 
-      const aboutRect = aboutSection.getBoundingClientRect();
+      const rect = aboutSection.getBoundingClientRect();
       const windowHeight = window.innerHeight;
       
-      // Check if section is in view
-      const aboutInView = aboutRect.top < windowHeight * 0.8 && aboutRect.bottom > 0;
-      setInView(aboutInView);
-      
-      // Calculate scroll progress within the about section
-      if (aboutInView) {
-        // Progress from 0 to 1 as user scrolls through the section
-        const sectionTop = aboutRect.top;
-        const sectionHeight = aboutRect.height;
-        const scrollProgress = 1 - Math.max(0, Math.min(1, sectionTop / (windowHeight * 0.8)));
-        
-        // Images come together at different stages
-        // Top image appears first (at 30% scroll progress)
-        // Bottom image appears second (at 60% scroll progress)
-        setImagePositions({
-          top: scrollProgress > 0.3,
-          bottom: scrollProgress > 0.6
-        });
-      } else if (aboutRect.top > windowHeight) {
-        // Section hasn't been reached yet - reset to initial state
-        setImagePositions({ top: false, bottom: false });
-      } else {
-        // Section has been scrolled past - keep images visible
-        setImagePositions({ top: true, bottom: true });
-      }
+      const isInView = rect.top < windowHeight * 0.8 && rect.bottom > 0;
+      setInView(isInView);
     };
 
     window.addEventListener('scroll', handleScroll);
-    // Initial check on mount
     setTimeout(handleScroll, 100);
     
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setButtonPulse(prev => !prev);
+    }, 2000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -67,11 +49,13 @@ const About = ({
       ref={aboutRef}
     >
       <section 
-        className={`relative w-full h-screen flex flex-col transition-colors duration-700 ${
-          isDark ? 'bg-gray-800' : 'bg-[#faf8f5]'
+        className={`relative w-full h-screen flex flex-col overflow-hidden transition-colors duration-700 ${
+          isDark 
+            ? 'bg-gray-900' 
+            : 'bg-gradient-to-br from-[#fafaf9] via-[#f8f9fa] to-[#f0fdf4]'
         }`}
       >
-        {/* Navbar integrated in about */}
+        {/* Navbar */}
         <div className="relative z-10">
           <Navbar 
             isDark={isDark}
@@ -83,107 +67,132 @@ const About = ({
           />
         </div>
 
-        {/* About Content */}
-        <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-8">
-          <div className="max-w-7xl mx-auto w-full">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
-              {/* Left Side - Animated Image Cards */}
-              <div ref={imageContainerRef} className="relative h-[400px] sm:h-[500px] lg:h-[600px]">
-                {/* Back Image - Top Right */}
-                <div 
-                  className={`absolute rounded-3xl sm:rounded-[2.5rem] overflow-hidden shadow-2xl transform transition-all duration-1000 ease-out ${
-                    imagePositions.top 
-                      ? 'top-0 right-0 w-[55%] sm:w-[60%] h-[60%] sm:h-[70%] opacity-100 rotate-0' 
-                      : 'top-1/2 right-[-20%] w-[45%] sm:w-[50%] h-[50%] sm:h-[60%] opacity-0 rotate-12'
-                  }`}
-                  style={{ 
-                    transitionDelay: imagePositions.top ? '0.2s' : '0s',
-                    zIndex: 20,
-                    transform: imagePositions.top && parallaxOffset 
-                      ? `translate(${parallaxOffset.x * 0.3}px, ${parallaxOffset.y * 0.3}px) rotate(0deg)` 
-                      : undefined
-                  }}
-                >
-                  <img 
-                    src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=600&h=900&fit=crop" 
-                    alt="Farmers in field"
-                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#40916c]/20 to-transparent"></div>
-                </div>
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className={`absolute -top-32 right-1/4 w-96 h-96 rounded-full blur-3xl opacity-25 ${
+            isDark ? 'bg-emerald-600' : 'bg-emerald-200'
+          }`} style={{ animation: 'drift 8s ease-in-out infinite' }}></div>
+          <div className={`absolute bottom-0 -left-32 w-80 h-80 rounded-full blur-3xl opacity-20 ${
+            isDark ? 'bg-teal-600' : 'bg-teal-200'
+          }`} style={{ animation: 'drift 10s ease-in-out infinite', animationDelay: '-2s' }}></div>
+        </div>
 
-                {/* Front Image - Bottom Left */}
-                <div 
-                  className={`absolute rounded-3xl sm:rounded-[2.5rem] overflow-hidden shadow-2xl transform transition-all duration-1000 ease-out ${
-                    imagePositions.bottom
-                      ? 'bottom-0 left-0 w-[60%] sm:w-[65%] h-[55%] sm:h-[65%] opacity-100 rotate-0'
-                      : 'bottom-1/2 left-[-20%] w-[50%] sm:w-[55%] h-[45%] sm:h-[55%] opacity-0 -rotate-12'
-                  }`}
-                  style={{ 
-                    transitionDelay: imagePositions.bottom ? '0.4s' : '0s',
-                    zIndex: 30,
-                    transform: imagePositions.bottom && parallaxOffset
-                      ? `translate(${parallaxOffset.x * 0.2}px, ${parallaxOffset.y * 0.2}px) rotate(0deg)`
-                      : undefined
-                  }}
-                >
-                  <img 
-                    src="https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=600&h=800&fit=crop" 
-                    alt="Agricultural innovation"
-                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#40916c]/20 to-transparent"></div>
-                </div>
+        {/* Main Content Container */}
+        <div className="relative z-20 flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+          <div className="w-full max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-6 items-center h-full">
+              
+              {/* Left Side - Lottie (takes 7 cols on lg) */}
+              <div className={`lg:col-span-7 relative h-[350px] sm:h-[450px] lg:h-[500px] transform transition-all duration-1000 delay-200 ${
+                inView ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+              }`}>
+                
+                {/* Glow effect behind animation */}
+                <div className={`absolute inset-0 rounded-full blur-3xl opacity-40 -z-10 ${
+                  isDark ? 'bg-gradient-to-br from-emerald-600 to-teal-600' : 'bg-gradient-to-br from-emerald-300 to-teal-300'
+                }`} style={{ 
+                  width: '120%', 
+                  height: '120%', 
+                  left: '-10%', 
+                  top: '-10%',
+                  animation: 'pulse 4s ease-in-out infinite'
+                }}></div>
 
-                {/* Decorative glow effect */}
-                <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 sm:w-64 sm:h-64 bg-[#40916c]/10 rounded-full blur-3xl transition-all duration-1000 ${
-                  inView ? 'opacity-30 scale-100' : 'opacity-0 scale-50'
-                }`}></div>
+                {/* Lottie Animation - Direct on page no background */}
+                <div className="relative w-full h-full flex items-center justify-center z-10">
+                  <DotLottieReact
+                    src="https://lottie.host/05b0936a-e537-4168-ba9f-6dfe891a169b/5b4X2kO7xR.lottie"
+                    loop
+                    autoplay
+                    className="w-full h-full max-w-full"
+                  />
+                </div>
               </div>
 
-              {/* Right Side - Content */}
-              <div className="space-y-4 sm:space-y-6">
-                <div className={`transform transition-all duration-1000 ${
-                  inView 
-                    ? 'translate-x-0 opacity-100' 
-                    : 'translate-x-10 opacity-0'
-                }`}>
-                  <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4 transition-colors duration-500 ${
-                    isDark ? 'text-white' : 'text-gray-900'
-                  }`} style={{ fontFamily: "'Outfit', sans-serif" }}>
+              {/* Right Side - Content (takes 5 cols on lg) */}
+              <div className={`lg:col-span-5 space-y-8 transform transition-all duration-1000 ${
+                inView ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'
+              }`}>
+                
+                {/* Heading with Curved Style */}
+                <div className="space-y-2">
+                  <h2 
+                    className={`text-5xl sm:text-6xl lg:text-6xl font-bold leading-tight ${
+                      isDark ? 'text-white' : 'text-gray-900'
+                    }`} 
+                    style={{ fontFamily: "'Outfit', sans-serif" }}
+                  >
                     About <span style={{ color: '#6E260E' }}>Imfuyo</span>
                   </h2>
+                  <div className={`h-1.5 w-20 rounded-full bg-gradient-to-r from-[#40916c] to-emerald-500`}></div>
                 </div>
 
-                <div className={`space-y-3 sm:space-y-4 text-base sm:text-lg leading-relaxed transition-all duration-1000 delay-300 ${
-                  inView 
-                    ? 'translate-x-0 opacity-100' 
-                    : 'translate-x-10 opacity-0'
-                } ${isDark ? 'text-gray-300' : 'text-gray-700'}`} style={{ fontFamily: "'Outfit', sans-serif" }}>
-                  <p>
-                    Imfuyo is a pioneering agricultural fintech platform dedicated to transforming the lives of smallholder farmers across Africa through innovative financial solutions and strategic partnerships.
-                  </p>
+                {/* Single Paragraph */}
+                <p 
+                  className={`text-base sm:text-lg leading-relaxed max-w-md ${
+                    isDark ? 'text-gray-300' : 'text-gray-700'
+                  }`} 
+                  style={{ fontFamily: "'Outfit', sans-serif" }}
+                >
+                  Imfuyo is a pioneering agricultural fintech platform bridging smallholder farmers and modern financial services across Africa. Through innovative solutions and data-driven technology, we empower farmers with the capital and tools they need to increase yields, build sustainable practices, and create lasting prosperity for their communities.
+                </p>
 
-                  <p>
-                    We bridge the gap between traditional agriculture and modern financial services, enabling farmers to access the resources they need to thrive and build prosperous communities.
-                  </p>
-                </div>
-
-                {/* Get to Know Us Button */}
-                <div className={`transform transition-all duration-1000 delay-500 ${
-                  inView 
-                    ? 'translate-y-0 opacity-100' 
-                    : 'translate-y-10 opacity-0'
+                {/* CTA Button with Animated Pulse */}
+                <div className={`pt-6 transform transition-all duration-1000 delay-300 ${
+                  inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
                 }`}>
-                  <button className="group flex items-center justify-center sm:justify-start space-x-2 bg-[#40916c] text-white px-5 py-2.5 sm:px-6 sm:py-3 rounded-full font-semibold hover:bg-[#2d6a4f] transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform mt-4 sm:mt-6 w-full sm:w-auto text-sm sm:text-base" style={{ fontFamily: "'Outfit', sans-serif" }}>
-                    <span>Get to Know Us More</span>
-                    <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
+                  <button 
+                    className={`group relative inline-flex items-center space-x-2 px-7 sm:px-8 py-3 sm:py-3.5 rounded-full font-semibold text-white overflow-hidden transition-all duration-300 ${
+                      buttonPulse ? 'scale-105 shadow-xl' : 'scale-100 shadow-lg'
+                    }`}
+                    style={{
+                      background: 'linear-gradient(135deg, #40916c 0%, #2d6a4f 100%)',
+                      fontFamily: "'Outfit', sans-serif",
+                      boxShadow: buttonPulse ? '0 0 30px rgba(64, 145, 108, 0.5), 0 8px 16px rgba(0,0,0,0.15)' : '0 8px 16px rgba(0,0,0,0.1)'
+                    }}
+                  >
+                    {/* Shine effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -skew-x-12"></div>
+                    
+                    <span className="relative">Know Us Better</span>
+                    <ArrowRight className="w-4 h-4 relative group-hover:translate-x-1 transition-transform duration-300" />
                   </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Styles */}
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+
+          @keyframes drift {
+            0%, 100% {
+              transform: translate(0, 0);
+            }
+            25% {
+              transform: translate(30px, -30px);
+            }
+            50% {
+              transform: translate(0, -50px);
+            }
+            75% {
+              transform: translate(-30px, -30px);
+            }
+          }
+
+          @keyframes pulse {
+            0%, 100% {
+              opacity: 0.35;
+              transform: scale(1);
+            }
+            50% {
+              opacity: 0.5;
+              transform: scale(1.05);
+            }
+          }
+        `}</style>
       </section>
     </div>
   );
