@@ -1,47 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Award, Target, Briefcase, MousePointerClick } from 'lucide-react';
+import { Briefcase } from 'lucide-react';
 
-export default function AboutTeam({ isActive, isDark, setIsModalOpen }) {
+export default function AboutFounder({ isActive, isDark }) {
   const [inView, setInView] = useState(false);
-  const [selectedMember, setSelectedMember] = useState(null);
-  const [hoveredCard, setHoveredCard] = useState(null);
-  const [showClickHint, setShowClickHint] = useState(false);
-  const teamRef = useRef(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const founderRef = useRef(null);
 
-  const teamMembers = [
-    {
-      id: 1,
-      name: 'Benard Njathi',
-      role: 'Chief Executive Officer & Founder',
-      image: 'https://res.cloudinary.com/dof2wtgd6/image/upload/v1760836563/559A9914-Edit_x0bkvt.jpg',
-      bio: 'Visionary leader driving agricultural transformation across Africa. Passionate about empowering farmers through innovative fintech solutions.',
-      color: 'from-emerald-500 to-teal-600'
-    },
-    {
-      id: 2,
-      name: 'Isaac Kidui',
-      role: 'Chief Operating Officer',
-      image: 'https://res.cloudinary.com/dof2wtgd6/image/upload/v1760836557/559A9930-Edit_pgupcs.jpg',
-      bio: 'Operations expert with a track record of scaling agribusiness ventures. Committed to building sustainable systems that deliver impact.',
-      color: 'from-green-500 to-emerald-600'
-    },
-    {
-      id: 3,
-      name: 'Ruth Mwangi',
-      role: 'Finance Officer',
-      image: 'https://res.cloudinary.com/dof2wtgd6/image/upload/v1760836567/559A9940-Edit_nqme2t.jpg',
-      bio: 'Financial strategist ensuring fiscal excellence and transparency. Dedicated to creating value for farmers and stakeholders alike.',
-      color: 'from-teal-500 to-cyan-600'
-    },
-    {
-      id: 4,
-      name: 'Timothy Kyovo',
-      role: 'Software Developer',
-      image: 'https://res.cloudinary.com/dof2wtgd6/image/upload/v1760836570/559A9966-Edit_dfjisp.jpg',
-      bio: 'Tech innovator crafting seamless digital experiences. Building the technology backbone that connects farmers to opportunities.',
-      color: 'from-cyan-500 to-blue-600'
-    }
-  ];
+  const founder = {
+    name: 'Benard Njathi',
+    title: 'Founder & President',
+    image: 'https://res.cloudinary.com/dpymwa41m/image/upload/v1761038091/1_hn32m4zAd8TrYJfS8wFFog_ul6ntd.jpg',
+    bio: 'Benard Njathi is the visionary founder and driving force behind our AgriFintech revolution. With a deep passion for transforming African agriculture, he recognized the critical gap in accessible financing for smallholder farmers and set out to bridge it through innovative technology.',
+    journey: 'Starting from humble beginnings, Benard has built a platform that serves thousands of farmers across Africa. His commitment to empowering agricultural communities has established new standards in digital financial services for the farming sector.'
+  };
+
+  // Preload image
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => setImageLoaded(true);
+    img.src = founder.image;
+  }, []);
 
   useEffect(() => {
     if (isActive) {
@@ -49,55 +27,21 @@ export default function AboutTeam({ isActive, isDark, setIsModalOpen }) {
     }
   }, [isActive]);
 
-  // Notify parent when modal opens/closes
-  useEffect(() => {
-    if (setIsModalOpen) {
-      setIsModalOpen(!!selectedMember);
-    }
-  }, [selectedMember, setIsModalOpen]);
-
-  // Show click hint after component is in view
-  useEffect(() => {
-    if (inView && isActive) {
-      const timer = setTimeout(() => {
-        setShowClickHint(true);
-      }, 1500);
-
-      const hideTimer = setTimeout(() => {
-        setShowClickHint(false);
-      }, 6000);
-
-      return () => {
-        clearTimeout(timer);
-        clearTimeout(hideTimer);
-      };
-    }
-  }, [inView, isActive]);
-
-  const handleCardClick = (e, member) => {
-    e.stopPropagation();
-    console.log('Card clicked:', member.name);
-    setSelectedMember(member);
-    setShowClickHint(false);
-  };
-
-  const handleCloseModal = (e) => {
-    e.stopPropagation();
-    setSelectedMember(null);
-  };
-
   return (
     <div 
       className={`fixed inset-0 transition-all duration-1000 ease-out ${
         isActive ? 'opacity-100 scale-100 blur-none pointer-events-auto' : 'opacity-0 scale-95 blur-lg pointer-events-none'
       }`}
-      ref={teamRef}
+      ref={founderRef}
     >
-      <section className={`relative w-full h-screen flex flex-col transition-colors duration-700 ${
-        isDark ? 'bg-gray-900' : 'bg-gradient-to-br from-[#fafaf9] via-[#f8f9fa] to-[#f0fdf4]'
-      }`}>
-        
-        {/* Animated Background */}
+      <section 
+        className={`relative w-full h-screen flex flex-col overflow-hidden transition-colors duration-700 ${
+          isDark 
+            ? 'bg-gray-900' 
+            : 'bg-gradient-to-br from-[#fafaf9] via-[#f8f9fa] to-[#f0fdf4]'
+        }`}
+      >
+        {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className={`absolute top-20 right-1/4 w-96 h-96 rounded-full blur-3xl opacity-20 ${
             isDark ? 'bg-emerald-600' : 'bg-emerald-300'
@@ -107,197 +51,149 @@ export default function AboutTeam({ isActive, isDark, setIsModalOpen }) {
           }`} style={{ animation: 'float 10s ease-in-out infinite', animationDelay: '-3s' }}></div>
         </div>
 
-        {/* Main Content - Centered with space at bottom */}
-        <div className="relative z-[60] flex flex-col items-center justify-center h-full pt-32 px-4 sm:px-6 lg:px-8" style={{ paddingBottom: '15vh' }}>
-          
-          {/* Header - Compact */}
-          <div className={`text-center mb-10 transform transition-all duration-1000 ${
-            inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}>
-            <h2 
-              className={`text-3xl sm:text-4xl lg:text-5xl font-bold ${
-                isDark ? 'text-white' : 'text-gray-900'
-              }`}
-              style={{ fontFamily: "'Outfit', sans-serif" }}
-            >
-              Meet the Team
-            </h2>
-          </div>
+        {/* Main Content Container */}
+        <div className="relative z-20 flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-20 pb-8">
+          <div className="w-full max-w-7xl mx-auto">
+            
+            {/* Section Header */}
+            <div className={`text-center mb-6 transform transition-all duration-1000 ${
+              inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}>
+              <h2 
+                className={`text-2xl sm:text-3xl lg:text-4xl font-bold ${
+                  isDark ? 'text-white' : 'text-gray-900'
+                }`}
+                style={{ fontFamily: "'Outfit', sans-serif" }}
+              >
+                The Man Behind the Vision
+              </h2>
+            </div>
 
-          {/* Team Cards - Single Row, Small Cards */}
-          <div className="w-full max-w-6xl mx-auto" data-no-scroll>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
-              {teamMembers.map((member, idx) => (
-                <div
-                  key={member.id}
-                  className={`team-card group cursor-pointer transform transition-all duration-1000 ${
-                    inView ? 'opacity-100' : 'opacity-0'
-                  }`}
-                  style={{ 
-                    transitionDelay: `${idx * 150}ms`,
-                    animation: inView ? `slideInUp 0.8s ease-out ${idx * 150}ms both` : 'none'
-                  }}
-                  onClick={(e) => handleCardClick(e, member)}
-                  onMouseEnter={() => setHoveredCard(member.id)}
-                  onMouseLeave={() => setHoveredCard(null)}
-                  data-no-scroll
-                >
-                  <div className={`relative rounded-2xl overflow-hidden backdrop-blur-xl ${
-                    isDark ? 'bg-white/5 border border-white/10' : 'bg-white/70 border border-white/50'
-                  } shadow-xl transition-all duration-500 ${
-                    hoveredCard === member.id ? 'scale-105 shadow-2xl -translate-y-2' : 'scale-100'
-                  }`}>
-                    
-                    {/* Image Container - Compact */}
-                    <div className="relative aspect-[3/4]">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
+              
+              {/* Left Side - Founder Image */}
+              <div className={`lg:col-span-5 relative transform transition-all duration-1000 delay-200 ${
+                inView ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+              }`}>
+                
+                {/* Glow effect behind image */}
+                <div className={`absolute inset-0 rounded-3xl blur-3xl opacity-30 -z-10 ${
+                  isDark ? 'bg-gradient-to-br from-emerald-600 to-teal-600' : 'bg-gradient-to-br from-emerald-300 to-teal-300'
+                }`} style={{ 
+                  width: '110%', 
+                  height: '110%', 
+                  left: '-5%', 
+                  top: '-5%',
+                  animation: 'pulse 4s ease-in-out infinite'
+                }}></div>
+
+                {/* Image Container */}
+                <div className={`relative rounded-3xl overflow-hidden backdrop-blur-xl ${
+                  isDark ? 'bg-white/5 border border-white/10' : 'bg-white/70 border border-white/50'
+                } shadow-2xl`}>
+                  
+                  {!imageLoaded && (
+                    <div className={`w-full aspect-[3/4] flex items-center justify-center ${
+                      isDark ? "bg-gray-800" : "bg-gray-200"
+                    }`}>
+                      <div className="animate-pulse">
+                        <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                      </div>
+                    </div>
+                  )}
+
+                  {imageLoaded && (
+                    <>
                       <img 
-                        src={member.image} 
-                        alt={member.name}
-                        className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-110"
+                        src={founder.image} 
+                        alt={founder.name}
+                        loading="eager"
+                        decoding="async"
+                        className="w-full h-full object-cover object-center"
+                        style={{ aspectRatio: '3/4', maxHeight: '65vh' }}
                         draggable="false"
                       />
                       
                       {/* Gradient Overlay at Bottom */}
-                      <div className={`absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t ${
+                      <div className={`absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t ${
                         isDark ? 'from-gray-900/95 via-gray-900/70 to-transparent' : 'from-gray-900/90 via-gray-900/60 to-transparent'
                       }`}></div>
-                    </div>
 
-                    {/* Info Overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 p-3 z-20 pointer-events-none">
-                      <h3 
-                        className="text-white text-xs sm:text-sm font-bold mb-0.5 leading-tight"
-                        style={{ fontFamily: "'Outfit', sans-serif" }}
-                      >
-                        {member.name}
-                      </h3>
-                      <p 
-                        className="text-gray-200 text-[10px] sm:text-xs leading-tight"
-                        style={{ fontFamily: "'Outfit', sans-serif" }}
-                      >
-                        {member.role}
-                      </p>
-                    </div>
-
-                    {/* Click Me Hint */}
-                    {showClickHint && (
-                      <div 
-                        className="absolute top-2 right-2 z-30 flex items-center space-x-1 bg-emerald-500 text-white px-2 py-1 rounded-full shadow-lg pointer-events-none"
-                        style={{ animation: 'bounce 2s ease-in-out infinite' }}
-                      >
-                        <MousePointerClick className="w-3 h-3" />
-                        <span className="text-[10px] font-semibold" style={{ fontFamily: "'Outfit', sans-serif" }}>
-                          Click
-                        </span>
+                      {/* Name Overlay */}
+                      <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
+                        <h3 
+                          className="text-white text-2xl sm:text-3xl font-bold mb-1"
+                          style={{ fontFamily: "'Outfit', sans-serif" }}
+                        >
+                          {founder.name}
+                        </h3>
+                        <div className="flex items-center space-x-2">
+                          <Briefcase className="w-4 h-4 text-emerald-400" />
+                          <p 
+                            className="text-emerald-300 text-sm sm:text-base font-medium"
+                            style={{ fontFamily: "'Outfit', sans-serif" }}
+                          >
+                            {founder.title}
+                          </p>
+                        </div>
                       </div>
-                    )}
-                  </div>
+                    </>
+                  )}
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
+              </div>
 
-        {/* Modal Popup */}
-        {selectedMember && (
-          <div 
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md"
-            onClick={handleCloseModal}
-            role="dialog"
-            aria-modal="true"
-            style={{ animation: 'fadeIn 0.3s ease-out' }}
-          >
-            <div 
-              className={`relative w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl ${
-                isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
-              }`}
-              onClick={(e) => e.stopPropagation()}
-              style={{ animation: 'scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
-            >
-              {/* Close Button */}
-              <button
-                onClick={handleCloseModal}
-                className={`absolute top-4 right-4 z-30 p-2 rounded-full transition-all duration-300 cursor-pointer ${
-                  isDark ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                }`}
-                type="button"
-                aria-label="Close modal"
-              >
-                <X className="w-6 h-6" />
-              </button>
-
-              {/* Content Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-5 h-full">
+              {/* Right Side - Content */}
+              <div className={`lg:col-span-7 space-y-5 transform transition-all duration-1000 delay-300 ${
+                inView ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'
+              }`}>
                 
-                {/* Left Side - Image */}
-                <div className="md:col-span-2 relative h-64 md:h-auto overflow-hidden">
-                  <img 
-                    src={selectedMember.image} 
-                    alt={selectedMember.name}
-                    className="w-full h-full object-cover"
-                    draggable="false"
-                  />
+                {/* Bio */}
+                <div className="space-y-3">
+                  <p 
+                    className={`text-sm sm:text-base leading-relaxed ${
+                      isDark ? 'text-gray-300' : 'text-gray-700'
+                    }`} 
+                    style={{ fontFamily: "'Outfit', sans-serif" }}
+                  >
+                    {founder.bio}
+                  </p>
+                  <p 
+                    className={`text-sm sm:text-base leading-relaxed ${
+                      isDark ? 'text-gray-300' : 'text-gray-700'
+                    }`} 
+                    style={{ fontFamily: "'Outfit', sans-serif" }}
+                  >
+                    {founder.journey}
+                  </p>
                 </div>
 
-                {/* Right Side - Info */}
-                <div className="md:col-span-3 p-8 sm:p-10 flex flex-col justify-center">
-                  {/* Role Badge */}
-                  <div className={`inline-flex items-center space-x-2 px-4 py-2 rounded-full mb-6 self-start ${
-                    isDark ? 'bg-emerald-500/20 text-emerald-300' : 'bg-emerald-100 text-emerald-700'
-                  }`}>
-                    <Briefcase className="w-4 h-4" />
-                    <span className="text-sm font-semibold" style={{ fontFamily: "'Outfit', sans-serif" }}>
-                      {selectedMember.role}
-                    </span>
-                  </div>
-
-                  {/* Name */}
-                  <h2 
-                    className={`text-3xl sm:text-4xl font-bold mb-4 ${
-                      isDark ? 'text-white' : 'text-gray-900'
-                    }`}
-                    style={{ fontFamily: "'Outfit', sans-serif" }}
-                  >
-                    {selectedMember.name}
-                  </h2>
-
-                  {/* Bio */}
+                {/* Quote */}
+                <div className={`rounded-2xl p-5 backdrop-blur-xl border-l-4 ${
+                  isDark 
+                    ? 'bg-white/5 border-emerald-500 border-r border-t border-b border-white/10' 
+                    : 'bg-white/70 border-emerald-600 border-r border-t border-b border-white/50'
+                }`}>
                   <p 
-                    className={`text-base sm:text-lg leading-relaxed mb-6 ${
+                    className={`text-sm sm:text-base italic leading-relaxed ${
                       isDark ? 'text-gray-300' : 'text-gray-700'
+                    }`} 
+                    style={{ fontFamily: "'Outfit', sans-serif" }}
+                  >
+                    "Every farmer deserves access to the tools and resources they need to thrive. We're not just providing financial services—we're building pathways to prosperity."
+                  </p>
+                  <p 
+                    className={`mt-2 text-xs sm:text-sm font-semibold ${
+                      isDark ? 'text-emerald-400' : 'text-emerald-600'
                     }`}
                     style={{ fontFamily: "'Outfit', sans-serif" }}
                   >
-                    {selectedMember.bio}
+                    — {founder.name}
                   </p>
-
-                  {/* Decorative Elements */}
-                  <div className="flex items-center space-x-4">
-                    <div className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
-                      isDark ? 'bg-white/5' : 'bg-gray-100'
-                    }`}>
-                      <Award className={`w-5 h-5 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} />
-                      <span className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`} style={{ fontFamily: "'Outfit', sans-serif" }}>
-                        Leadership
-                      </span>
-                    </div>
-                    <div className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
-                      isDark ? 'bg-white/5' : 'bg-gray-100'
-                    }`}>
-                      <Target className={`w-5 h-5 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} />
-                      <span className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`} style={{ fontFamily: "'Outfit', sans-serif" }}>
-                        Innovation
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Gradient Line */}
-                  <div className="mt-8 h-1 rounded-full bg-gradient-to-r bg-emerald-600 w-24"></div>
                 </div>
               </div>
             </div>
           </div>
-        )}
+        </div>
 
         {/* Styles */}
         <style>{`
@@ -315,51 +211,29 @@ export default function AboutTeam({ isActive, isDark, setIsModalOpen }) {
             }
           }
 
-          @keyframes fadeIn {
-            from {
-              opacity: 0;
-            }
-            to {
-              opacity: 1;
-            }
-          }
-
-          @keyframes scaleIn {
-            from {
-              opacity: 0;
-              transform: scale(0.9);
-            }
-            to {
-              opacity: 1;
+          @keyframes pulse {
+            0%, 100% {
+              opacity: 0.3;
               transform: scale(1);
+            }
+            50% {
+              opacity: 0.4;
+              transform: scale(1.05);
             }
           }
 
           @keyframes slideInUp {
             from {
               opacity: 0;
-              transform: translateY(40px) scale(0.95);
+              transform: translateY(30px);
             }
             to {
               opacity: 1;
-              transform: translateY(0) scale(1);
+              transform: translateY(0);
             }
-          }
-
-          @keyframes bounce {
-            0%, 100% {
-              transform: translateY(0) scale(1);
-            }
-            50% {
-              transform: translateY(-8px) scale(1.05);
-            }
-          }
-
-          .team-card {
-            user-select: none;
           }
         `}</style>
       </section>
     </div>
   );
-}
+} 
