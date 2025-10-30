@@ -8,6 +8,20 @@ const CartDrawer = ({ showCart, setShowCart, cart, updateQuantity, removeFromCar
     return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   };
 
+  const getItemDisplayName = (item) => {
+    if (item.animalType) {
+      return `${item.name} - ${item.animalType}`;
+    }
+    return item.name;
+  };
+
+  const getItemKey = (item) => {
+    if (item.optionId) {
+      return `${item.itemType}-${item.id}-${item.optionId}`;
+    }
+    return `${item.itemType}-${item.id}`;
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex justify-end" onClick={() => setShowCart(false)}>
       <div 
@@ -35,7 +49,7 @@ const CartDrawer = ({ showCart, setShowCart, cart, updateQuantity, removeFromCar
           ) : (
             <div className="space-y-4">
               {cart.map((item) => (
-                <div key={`${item.itemType}-${item.id}`} className={`${isDark ? 'bg-gray-800' : 'bg-gray-50'} rounded-2xl p-4`}>
+                <div key={getItemKey(item)} className={`${isDark ? 'bg-gray-800' : 'bg-gray-50'} rounded-2xl p-4`}>
                   <div className="flex gap-4">
                     <img
                       src={item.images[0]}
@@ -44,15 +58,22 @@ const CartDrawer = ({ showCart, setShowCart, cart, updateQuantity, removeFromCar
                     />
                     <div className="flex-1">
                       <h4 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'} mb-1`}>
-                        {item.name}
+                        {getItemDisplayName(item)}
                       </h4>
+                      {item.animalType && (
+                        <span className={`inline-block px-2 py-1 rounded-md text-xs font-medium mb-2 ${
+                          isDark ? 'bg-green-900 text-green-300' : 'bg-green-100 text-green-700'
+                        }`}>
+                          {item.animalType}
+                        </span>
+                      )}
                       <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'} mb-2`}>
                         {item.unit || item.itemType}
                       </p>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() => updateQuantity(item.id, item.itemType, -1)}
+                            onClick={() => updateQuantity(item.id, item.itemType, -1, item.optionId)}
                             className={`w-8 h-8 ${isDark ? 'bg-gray-700 hover:bg-gray-600' : 'bg-white hover:bg-gray-100'} rounded-lg flex items-center justify-center transition-colors`}
                           >
                             <Minus className={`w-4 h-4 ${isDark ? 'text-gray-300' : 'text-gray-600'}`} />
@@ -61,14 +82,14 @@ const CartDrawer = ({ showCart, setShowCart, cart, updateQuantity, removeFromCar
                             {item.quantity}
                           </span>
                           <button
-                            onClick={() => updateQuantity(item.id, item.itemType, 1)}
+                            onClick={() => updateQuantity(item.id, item.itemType, 1, item.optionId)}
                             className={`w-8 h-8 ${isDark ? 'bg-gray-700 hover:bg-gray-600' : 'bg-white hover:bg-gray-100'} rounded-lg flex items-center justify-center transition-colors`}
                           >
                             <Plus className={`w-4 h-4 ${isDark ? 'text-gray-300' : 'text-gray-600'}`} />
                           </button>
                         </div>
                         <button
-                          onClick={() => removeFromCart(item.id, item.itemType)}
+                          onClick={() => removeFromCart(item.id, item.itemType, item.optionId)}
                           className="text-red-500 hover:text-red-600 transition-colors"
                         >
                           <X className="w-5 h-5" />

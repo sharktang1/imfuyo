@@ -11,28 +11,71 @@ const Shop = ({ isDark, onBack }) => {
   const [showCart, setShowCart] = useState(false);
 
   const addToCart = (item) => {
-    const existing = cart.find(cartItem => cartItem.id === item.id && cartItem.itemType === (item.category ? 'livestock' : 'product'));
-    if (existing) {
-      setCart(cart.map(cartItem => 
-        cartItem.id === item.id && cartItem.itemType === existing.itemType
-          ? { ...cartItem, quantity: cartItem.quantity + 1 }
-          : cartItem
-      ));
+    const itemType = item.category ? 'livestock' : 'product';
+    
+    // For items with animal type options (ear tags)
+    if (item.optionId) {
+      const existing = cart.find(cartItem => 
+        cartItem.id === item.id && 
+        cartItem.itemType === itemType && 
+        cartItem.optionId === item.optionId
+      );
+      
+      if (existing) {
+        setCart(cart.map(cartItem => 
+          cartItem.id === item.id && 
+          cartItem.itemType === itemType && 
+          cartItem.optionId === item.optionId
+            ? { ...cartItem, quantity: cartItem.quantity + 1 }
+            : cartItem
+        ));
+      } else {
+        setCart([...cart, { ...item, quantity: 1, itemType }]);
+      }
     } else {
-      setCart([...cart, { ...item, quantity: 1, itemType: item.category ? 'livestock' : 'product' }]);
+      // For regular items without options
+      const existing = cart.find(cartItem => 
+        cartItem.id === item.id && 
+        cartItem.itemType === itemType
+      );
+      
+      if (existing) {
+        setCart(cart.map(cartItem => 
+          cartItem.id === item.id && cartItem.itemType === itemType
+            ? { ...cartItem, quantity: cartItem.quantity + 1 }
+            : cartItem
+        ));
+      } else {
+        setCart([...cart, { ...item, quantity: 1, itemType }]);
+      }
     }
   };
 
-  const updateQuantity = (itemId, itemType, delta) => {
-    setCart(cart.map(item => 
-      item.id === itemId && item.itemType === itemType
+  const updateQuantity = (itemId, itemType, delta, optionId = null) => {
+    setCart(cart.map(item => {
+      // Match by id, itemType, and optionId (if provided)
+      const isMatch = optionId 
+        ? item.id === itemId && item.itemType === itemType && item.optionId === optionId
+        : item.id === itemId && item.itemType === itemType;
+      
+      return isMatch
         ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-        : item
-    ).filter(item => item.quantity > 0));
+        : item;
+    }).filter(item => item.quantity > 0));
   };
 
-  const removeFromCart = (itemId, itemType) => {
-    setCart(cart.filter(item => !(item.id === itemId && item.itemType === itemType)));
+  const removeFromCart = (itemId, itemType, optionId = null) => {
+    setCart(cart.filter(item => {
+      // Match by id, itemType, and optionId (if provided)
+      if (optionId) {
+        return !(item.id === itemId && item.itemType === itemType && item.optionId === optionId);
+      }
+      return !(item.id === itemId && item.itemType === itemType);
+    }));
+  };
+
+  const getTotalItems = () => {
+    return cart.reduce((sum, item) => sum + item.quantity, 0);
   };
 
   return (
@@ -94,7 +137,7 @@ const Shop = ({ isDark, onBack }) => {
         <ShoppingCart className="w-6 h-6" />
         {cart.length > 0 && (
           <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-            {cart.length}
+            {getTotalItems()}
           </span>
         )}
       </button>

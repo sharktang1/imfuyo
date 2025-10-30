@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Users, TrendingUp, MapPin, Award, Heart, Sprout, DollarSign, Target } from 'lucide-react';
 
-const OurImpact = ({ isDark, onBack }) => {
+const OurImpact = ({ isDark, onBack, onNavigate }) => {
   const [inView, setInView] = useState({});
   const sectionRefs = useRef({});
 
@@ -139,6 +139,12 @@ const OurImpact = ({ isDark, onBack }) => {
       }
     };
     return colors[color];
+  };
+
+  const handleGetInvolved = () => {
+    if (onNavigate) {
+      onNavigate('members');
+    }
   };
 
   return (
@@ -422,6 +428,7 @@ const OurImpact = ({ isDark, onBack }) => {
               Together, we can create lasting change in African agriculture
             </p>
             <button 
+              onClick={handleGetInvolved}
               className={`px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 hover:scale-105 ${
                 isDark 
                   ? 'bg-emerald-500 hover:bg-emerald-600 text-white' 

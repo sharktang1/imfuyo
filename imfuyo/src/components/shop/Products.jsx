@@ -1,15 +1,24 @@
-import React, { useState } from 'react';
-import { ShoppingCart, Eye, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ShoppingCart, Eye, ChevronLeft, ChevronRight, X, Check, Plus, Minus } from 'lucide-react';
+import { db } from '../../Libs/firebase-config.mjs';
+import { collection, getDocs } from 'firebase/firestore';
 
 const Products = ({ isDark, addToCart }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [selectedAnimalTypes, setSelectedAnimalTypes] = useState({});
+  const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Use ref to prevent double fetching
+  const hasFetched = useRef(false);
 
-  const products = [
+  // Default products as fallback
+  const defaultProducts = [
     {
       id: 1,
       name: 'Livestock Ear Tags',
-      price: 1500,
+      basePrice: 1500,
       description: 'Durable and weather-resistant ear tags for cattle and goats. Easy to read numbering system for efficient livestock management.',
       category: 'identification',
       images: [
@@ -19,40 +28,91 @@ const Products = ({ isDark, addToCart }) => {
         'https://res.cloudinary.com/dpymwa41m/image/upload/v1761179449/Ear-Tags-for-Goats-1-500x500_j7eaih.jpg'
       ],
       stock: 500,
-      unit: 'per 100 tags'
-    },
-    {
-      id: 2,
-      name: 'Tag Applicators',
-      price: 2500,
-      description: 'Professional-grade applicator for quick and painless ear tag installation. Ergonomic design for comfortable use.',
-      category: 'tools',
-      images: [
-        'https://res.cloudinary.com/dpymwa41m/image/upload/v1761179505/h73ba8e6c9d7540a1b05c395596600ff7m-500x500_dsepbo.webp',
-        'https://res.cloudinary.com/dpymwa41m/image/upload/v1761179540/41a1Ilm_ecL._AC_UF1000_1000_QL80__pepjam.jpg',
-        'https://res.cloudinary.com/dpymwa41m/image/upload/v1761179582/download_xafs5d.jpg'
-      ],
-      stock: 150,
-      unit: 'per piece'
-    },
-    {
-      id: 3,
-      name: 'Ruminal Magnetic Boluses',
-      price: 800,
-      description: 'Premium magnetic boluses designed to prevent hardware disease in cattle. Smooth-edged for safe administration.',
-      category: 'health',
-      images: [
-        'https://res.cloudinary.com/dpymwa41m/image/upload/v1761179658/Rumen-Magnet3_de7xwt.webp',
-        'https://res.cloudinary.com/dpymwa41m/image/upload/v1761179708/Whole-Sales-Plastic-Calf-Magnet-Cage-Cattle-Rumen-Stomach-Cow-Magnet-Bolus_yv3ghe.avif',
-        'https://res.cloudinary.com/dpymwa41m/image/upload/v1761179718/Whole-Sales-Plastic-Calf-Magnet-Cage-Cattle-Rumen-Stomach-Cow-Magnet-Bolus_fwmzne.avif',
-        'https://res.cloudinary.com/dpymwa41m/image/upload/v1761179768/Rumen-Magnet-2-scaled_yeoiwb.jpg',
-        'https://res.cloudinary.com/dpymwa41m/image/upload/v1761179823/Ruminal-Cow-Magnets_xkz6cs.jpg'
-      ],
-      stock: 300,
-      unit: 'per unit'
+      unit: 'per 100 tags',
+      hasOptions: true,
+      options: [
+        {
+          id: 'cows',
+          name: 'Cows',
+          price: 1800,
+          description: 'Large, durable ear tags designed for cattle. Extra-strong material for long-lasting identification.'
+        },
+        {
+          id: 'ruminants',
+          name: 'Ruminants (Sheep & Goats)',
+          price: 1500,
+          description: 'Medium-sized ear tags perfect for sheep and goats. Lightweight yet durable construction.'
+        },
+        {
+          id: 'pigs',
+          name: 'Pigs',
+          price: 1650,
+          description: 'Specialized ear tags for swine with reinforced edges for active animals.'
+        }
+      ]
     }
   ];
 
+  // Fetch products data from Firestore - OPTIMIZED
+  const fetchProductsData = async () => {
+    // Prevent double fetching
+    if (hasFetched.current) {
+      console.log('🔄 Fetch already in progress or completed, skipping...');
+      return;
+    }
+    
+    hasFetched.current = true;
+    
+    try {
+      console.log('🚀 Fetching products from Firestore...');
+      setIsLoading(true);
+      
+      const productsRef = collection(db, 'shop', 'categories', 'products');
+      const productsSnapshot = await getDocs(productsRef);
+      
+      console.log(`✅ Found ${productsSnapshot.size} products`);
+      
+      let productsData = [];
+
+      if (!productsSnapshot.empty) {
+        productsData = productsSnapshot.docs.map(doc => {
+          const data = doc.data();
+          return { 
+            id: doc.id, 
+            ...data,
+            price: data.price || data.basePrice || 0,
+            basePrice: data.basePrice || data.price || 0
+          };
+        });
+      } else {
+        console.warn('⚠️ No products found, using default data');
+        productsData = defaultProducts;
+      }
+
+      setProducts(productsData);
+      
+    } catch (error) {
+      console.error('❌ Error fetching products:', error.message);
+      setProducts(defaultProducts);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch data when component mounts - OPTIMIZED
+  useEffect(() => {
+    // Only fetch if we haven't already and if products array is empty
+    if (!hasFetched.current && products.length === 0) {
+      fetchProductsData();
+    }
+    
+    // Cleanup function to reset the flag when component unmounts
+    return () => {
+      hasFetched.current = false;
+    };
+  }, [products.length]); // Add products.length as dependency
+
+  // Rest of your existing functions remain the same
   const nextImage = () => {
     if (selectedProduct) {
       setCurrentImageIndex((prev) => (prev + 1) % selectedProduct.images.length);
@@ -65,8 +125,70 @@ const Products = ({ isDark, addToCart }) => {
     }
   };
 
+  const handleQuantityChange = (optionId, change) => {
+    setSelectedAnimalTypes(prev => {
+      const currentQty = prev[optionId] || 0;
+      const newQty = Math.max(0, currentQty + change);
+      
+      if (newQty === 0) {
+        const { [optionId]: removed, ...rest } = prev;
+        return rest;
+      }
+      
+      return {
+        ...prev,
+        [optionId]: newQty
+      };
+    });
+  };
+
+  const getTotalPrice = () => {
+    if (!selectedProduct || !selectedProduct.hasOptions) return 0;
+    
+    return Object.entries(selectedAnimalTypes).reduce((total, [optionId, quantity]) => {
+      const option = selectedProduct.options.find(opt => opt.id === optionId);
+      return total + (option.price * quantity);
+    }, 0);
+  };
+
+  const getTotalItems = () => {
+    return Object.values(selectedAnimalTypes).reduce((sum, qty) => sum + qty, 0);
+  };
+
+  const handleAddToCart = () => {
+    if (selectedProduct.hasOptions) {
+      if (Object.keys(selectedAnimalTypes).length === 0) {
+        return;
+      }
+
+      Object.entries(selectedAnimalTypes).forEach(([optionId, quantity]) => {
+        const selectedOption = selectedProduct.options.find(opt => opt.id === optionId);
+        const productToAdd = {
+          ...selectedProduct,
+          price: selectedOption.price,
+          animalType: selectedOption.name,
+          optionId: selectedOption.id,
+          quantity: quantity
+        };
+        
+        for (let i = 0; i < quantity; i++) {
+          addToCart(productToAdd);
+        }
+      });
+    } else {
+      addToCart(selectedProduct);
+    }
+
+    setSelectedProduct(null);
+    setCurrentImageIndex(0);
+    setSelectedAnimalTypes({});
+  };
+
   const ProductModal = () => {
     if (!selectedProduct) return null;
+
+    const totalPrice = selectedProduct.hasOptions ? getTotalPrice() : selectedProduct.price;
+    const totalItems = getTotalItems();
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
@@ -79,6 +201,7 @@ const Products = ({ isDark, addToCart }) => {
               onClick={() => {
                 setSelectedProduct(null);
                 setCurrentImageIndex(0);
+                setSelectedAnimalTypes({});
               }}
               className={`p-2 ${isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} rounded-full transition-colors`}
             >
@@ -138,38 +261,150 @@ const Products = ({ isDark, addToCart }) => {
                     {selectedProduct.description}
                   </p>
 
+                  {selectedProduct.hasOptions && (
+                    <div className="mb-6">
+                      <h4 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'} mb-4`}>
+                        Select Animal Types & Quantities:
+                      </h4>
+                      <div className="space-y-3">
+                        {selectedProduct.options.map((option) => {
+                          const quantity = selectedAnimalTypes[option.id] || 0;
+                          const isSelected = quantity > 0;
+
+                          return (
+                            <div
+                              key={option.id}
+                              className={`p-4 rounded-xl border-2 transition-all ${
+                                isSelected
+                                  ? 'border-green-500 bg-green-500 bg-opacity-10'
+                                  : isDark 
+                                    ? 'border-gray-700 bg-gray-800' 
+                                    : 'border-gray-200 bg-gray-50'
+                              }`}
+                            >
+                              <div className="flex items-start justify-between mb-3">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className={`font-semibold ${
+                                      isSelected 
+                                        ? 'text-green-600' 
+                                        : isDark ? 'text-white' : 'text-gray-900'
+                                    }`}>
+                                      {option.name}
+                                    </span>
+                                    {isSelected && (
+                                      <Check className="w-5 h-5 text-green-500" />
+                                    )}
+                                  </div>
+                                  <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-2`}>
+                                    {option.description}
+                                  </p>
+                                  <p className="text-lg font-bold text-green-500">
+                                    KSh {option.price.toLocaleString()} <span className="text-sm font-normal">{selectedProduct.unit}</span>
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center justify-between">
+                                <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                  Quantity:
+                                </span>
+                                <div className="flex items-center gap-3">
+                                  <button
+                                    onClick={() => handleQuantityChange(option.id, -1)}
+                                    disabled={quantity === 0}
+                                    className={`p-2 rounded-lg transition-colors ${
+                                      quantity === 0
+                                        ? isDark ? 'bg-gray-800 text-gray-600' : 'bg-gray-100 text-gray-400'
+                                        : isDark ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
+                                    }`}
+                                  >
+                                    <Minus className="w-4 h-4" />
+                                  </button>
+                                  <span className={`w-12 text-center font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                    {quantity}
+                                  </span>
+                                  <button
+                                    onClick={() => handleQuantityChange(option.id, 1)}
+                                    className={`p-2 rounded-lg transition-colors ${
+                                      isDark ? 'bg-green-600 hover:bg-green-700' : 'bg-green-500 hover:bg-green-600'
+                                    } text-white`}
+                                  >
+                                    <Plus className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </div>
+
+                              {quantity > 0 && (
+                                <div className={`mt-3 pt-3 border-t ${isDark ? 'border-gray-700' : 'border-gray-200'} flex justify-between items-center`}>
+                                  <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                    Subtotal:
+                                  </span>
+                                  <span className="font-bold text-green-500">
+                                    KSh {(option.price * quantity).toLocaleString()}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="space-y-4 mb-6">
-                    <div className={`flex items-center justify-between py-3 border-t ${isDark ? 'border-gray-800' : 'border-gray-100'}`}>
-                      <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Price</span>
+                    {selectedProduct.hasOptions && totalItems > 0 && (
+                      <div className={`flex items-center justify-between py-3 border-t ${isDark ? 'border-gray-800' : 'border-gray-100'}`}>
+                        <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Total Items</span>
+                        <span className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                          {totalItems}
+                        </span>
+                      </div>
+                    )}
+                    <div className={`flex items-center justify-between py-3 ${selectedProduct.hasOptions ? 'border-t' : 'border-t'} ${isDark ? 'border-gray-800' : 'border-gray-100'}`}>
+                      <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>
+                        {selectedProduct.hasOptions && totalItems > 0 ? 'Total Price' : 'Price'}
+                      </span>
                       <span className="text-2xl font-bold text-green-500">
-                        KSh {selectedProduct.price.toLocaleString()}
+                        KSh {totalPrice.toLocaleString()}
                       </span>
                     </div>
-                    <div className={`flex items-center justify-between py-3 border-t ${isDark ? 'border-gray-800' : 'border-gray-100'}`}>
-                      <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Unit</span>
-                      <span className={`${isDark ? 'text-white' : 'text-gray-900'} font-medium`}>
-                        {selectedProduct.unit}
-                      </span>
-                    </div>
-                    <div className={`flex items-center justify-between py-3 border-t border-b ${isDark ? 'border-gray-800' : 'border-gray-100'}`}>
-                      <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Stock</span>
-                      <span className={`${isDark ? 'text-white' : 'text-gray-900'} font-medium`}>
-                        {selectedProduct.stock} available
-                      </span>
-                    </div>
+                    {!selectedProduct.hasOptions && (
+                      <>
+                        <div className={`flex items-center justify-between py-3 border-t ${isDark ? 'border-gray-800' : 'border-gray-100'}`}>
+                          <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Unit</span>
+                          <span className={`${isDark ? 'text-white' : 'text-gray-900'} font-medium`}>
+                            {selectedProduct.unit}
+                          </span>
+                        </div>
+                        <div className={`flex items-center justify-between py-3 border-t border-b ${isDark ? 'border-gray-800' : 'border-gray-100'}`}>
+                          <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Stock</span>
+                          <span className={`${isDark ? 'text-white' : 'text-gray-900'} font-medium`}>
+                            {selectedProduct.stock} available
+                          </span>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
 
                 <button
-                  onClick={() => {
-                    addToCart(selectedProduct);
-                    setSelectedProduct(null);
-                    setCurrentImageIndex(0);
-                  }}
-                  className="w-full bg-green-500 hover:bg-green-600 text-white py-4 rounded-2xl font-semibold transition-colors flex items-center justify-center gap-2 shadow-lg"
+                  onClick={handleAddToCart}
+                  disabled={selectedProduct.hasOptions && Object.keys(selectedAnimalTypes).length === 0}
+                  className={`w-full py-4 rounded-2xl font-semibold transition-all flex items-center justify-center gap-2 shadow-lg ${
+                    selectedProduct.hasOptions && Object.keys(selectedAnimalTypes).length === 0
+                      ? isDark 
+                        ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      : 'bg-green-500 hover:bg-green-600 text-white'
+                  }`}
                 >
                   <ShoppingCart className="w-5 h-5" />
-                  Add to Cart
+                  {selectedProduct.hasOptions && Object.keys(selectedAnimalTypes).length === 0
+                    ? 'Select at least one animal type' 
+                    : selectedProduct.hasOptions && totalItems > 0
+                    ? `Add ${totalItems} ${totalItems === 1 ? 'item' : 'items'} to Cart`
+                    : 'Add to Cart'}
                 </button>
               </div>
             </div>
@@ -179,56 +414,90 @@ const Products = ({ isDark, addToCart }) => {
     );
   };
 
+  const handleQuickAdd = (product, e) => {
+    e.stopPropagation();
+    
+    if (product.hasOptions) {
+      setSelectedProduct(product);
+    } else {
+      addToCart(product);
+    }
+  };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        <div className="flex justify-center items-center h-64">
+          <div className={`text-lg ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+            Loading products...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {products.map((product) => (
-          <div
-            key={product.id}
-            className={`group ${isDark ? 'bg-gray-900 border-gray-800 hover:border-green-500' : 'bg-white border-gray-200 hover:border-green-300'} rounded-3xl overflow-hidden border hover:shadow-xl transition-all duration-300 cursor-pointer relative`}
-            onClick={() => setSelectedProduct(product)}
-          >
-            <div className="absolute top-4 right-4 z-10 bg-green-500 text-white px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
-              <Eye className="w-3 h-3" />
-              View Details
-            </div>
+      <div className="flex justify-between items-center mb-8">
+        <h2 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          Our Products
+        </h2>
+      </div>
 
-            <div className={`aspect-square ${isDark ? 'bg-gray-800' : 'bg-gray-50'} overflow-hidden`}>
-              <img
-                src={product.images[0]}
-                alt={product.name}
-                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
-              />
-            </div>
-            <div className="p-6">
-              <h3 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-2`}>
-                {product.name}
-              </h3>
-              <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-sm mb-4 line-clamp-2`}>
-                {product.description}
-              </p>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-2xl font-bold text-green-500">
-                    KSh {product.price.toLocaleString()}
-                  </p>
-                  <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                    {product.unit}
-                  </p>
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {products.length > 0 ? (
+          products.map((product) => (
+            <div
+              key={product.id}
+              className={`group ${isDark ? 'bg-gray-900 border-gray-800 hover:border-green-500' : 'bg-white border-gray-200 hover:border-green-300'} rounded-3xl overflow-hidden border hover:shadow-xl transition-all duration-300 cursor-pointer relative`}
+              onClick={() => setSelectedProduct(product)}
+            >
+              <div className="absolute top-4 right-4 z-10 bg-green-500 text-white px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
+                <Eye className="w-3 h-3" />
+                View Details
+              </div>
+
+              <div className={`aspect-square ${isDark ? 'bg-gray-800' : 'bg-gray-50'} overflow-hidden`}>
+                <img
+                  src={product.images?.[0] || 'https://via.placeholder.com/400'}
+                  alt={product.name}
+                  className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                />
+              </div>
+              <div className="p-6">
+                <h3 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-2`}>
+                  {product.name}
+                </h3>
+                <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-sm mb-4 line-clamp-2`}>
+                  {product.description}
+                </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-2xl font-bold text-green-500">
+                      {product.hasOptions ? 'From ' : ''}KSh {(product.price || product.basePrice || 0).toLocaleString()}
+                    </p>
+                    <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                      {product.unit || 'per item'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={(e) => handleQuickAdd(product, e)}
+                    className="bg-green-500 hover:bg-green-600 text-white p-3 rounded-xl transition-colors shadow-lg"
+                  >
+                    <ShoppingCart className="w-5 h-5" />
+                  </button>
                 </div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    addToCart(product);
-                  }}
-                  className="bg-green-500 hover:bg-green-600 text-white p-3 rounded-xl transition-colors shadow-lg"
-                >
-                  <ShoppingCart className="w-5 h-5" />
-                </button>
               </div>
             </div>
+          ))
+        ) : (
+          <div className="col-span-3 text-center py-12">
+            <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              No products found. Please check the Firestore configuration.
+            </p>
           </div>
-        ))}
+        )}
       </div>
 
       <ProductModal />

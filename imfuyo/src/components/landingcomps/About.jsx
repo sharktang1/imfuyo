@@ -1,12 +1,155 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { ArrowRight } from 'lucide-react';
+import { db } from '../../Libs/firebase-config.mjs';
+import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
+
+// Cache configuration
+const CACHE_KEY = 'about-content-cache';
+const CACHE_DURATION = 1000 * 60 * 30; // 30 minutes cache
 
 export default function About({ parallaxOffset, isDark, onNavigateToAbout }) {
   const [inView, setInView] = useState(false);
   const [buttonPulse, setButtonPulse] = useState(false);
+  const [aboutData, setAboutData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const aboutRef = useRef(null);
 
+  // Default content as fallback
+  const defaultAboutData = {
+    title: "About Imfuyo",
+    description: "Imfuyo is a pioneering agricultural fintech platform bridging smallholder farmers and modern financial services across Africa. Through innovative solutions and data-driven technology, we empower farmers with the capital and tools they need to increase yields, build sustainable practices, and create lasting prosperity for their communities.",
+    animationUrl: "https://lottie.host/05b0936a-e537-4168-ba9f-6dfe891a169b/5b4X2kO7xR.lottie"
+  };
+
+  // Cache management functions
+  const getCachedData = () => {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (!cached) return null;
+
+      const { data, timestamp } = JSON.parse(cached);
+      
+      // Check if cache is still valid
+      if (Date.now() - timestamp < CACHE_DURATION) {
+        return data;
+      }
+      
+      // Cache expired, remove it
+      localStorage.removeItem(CACHE_KEY);
+      return null;
+    } catch (error) {
+      console.error('Error reading cache:', error);
+      return null;
+    }
+  };
+
+  const setCachedData = (data) => {
+    try {
+      const cacheData = {
+        data,
+        timestamp: Date.now()
+      };
+      localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
+    } catch (error) {
+      console.error('Error setting cache:', error);
+    }
+  };
+
+  // Check for meta updates
+  const checkForMetaUpdates = async () => {
+    try {
+      const metaRef = collection(db, 'Landingpage', 'meta', 'changes');
+      const metaSnap = await getDocs(metaRef);
+      
+      let latestAboutUpdate = null;
+      
+      metaSnap.forEach((doc) => {
+        const metaData = doc.data();
+        if (metaData.section === 'About Section') {
+          const updateTime = metaData.timestamp?.toDate?.()?.getTime();
+          if (updateTime && (!latestAboutUpdate || updateTime > latestAboutUpdate)) {
+            latestAboutUpdate = updateTime;
+          }
+        }
+      });
+      
+      return latestAboutUpdate;
+    } catch (error) {
+      console.error('Error checking meta updates:', error);
+      return null;
+    }
+  };
+
+  // Fetch about data from Firestore
+  const fetchAboutData = async (forceRefresh = false) => {
+    try {
+      setIsLoading(true);
+      
+      // Check cache first (unless force refresh)
+      if (!forceRefresh) {
+        const cachedData = getCachedData();
+        if (cachedData) {
+          setAboutData(cachedData);
+          setIsLoading(false);
+          
+          // Check for updates in background
+          checkAndUpdateIfNeeded(cachedData.lastMetaCheck);
+          return;
+        }
+      }
+
+      // Fetch fresh data from Firestore
+      const aboutSnap = await getDoc(doc(db, 'Landingpage', 'about'));
+      
+      let aboutContent = defaultAboutData;
+
+      if (aboutSnap.exists()) {
+        const data = aboutSnap.data();
+        aboutContent = {
+          title: data.title || defaultAboutData.title,
+          description: data.description || defaultAboutData.description,
+          animationUrl: data.animationUrl || defaultAboutData.animationUrl,
+          lastUpdated: data.lastUpdated?.toDate?.() || new Date(),
+          lastMetaCheck: Date.now()
+        };
+        console.log('About data loaded from Firestore:', aboutContent);
+      } else {
+        console.warn('About document not found at Landingpage/about, using default data');
+        aboutContent.lastMetaCheck = Date.now();
+      }
+
+      setAboutData(aboutContent);
+      setCachedData(aboutContent);
+      
+    } catch (error) {
+      console.error('Error fetching about data:', error);
+      setAboutData(defaultAboutData);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Check and update if needed
+  const checkAndUpdateIfNeeded = async (lastCheckTime) => {
+    try {
+      const latestUpdate = await checkForMetaUpdates();
+      
+      if (latestUpdate && latestUpdate > lastCheckTime) {
+        console.log('About section updated, refreshing data...');
+        fetchAboutData(true);
+      }
+    } catch (error) {
+      console.error('Error in background update check:', error);
+    }
+  };
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchAboutData();
+  }, []);
+
+  // Intersection observer for animations
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -26,12 +169,33 @@ export default function About({ parallaxOffset, isDark, onNavigateToAbout }) {
     };
   }, []);
 
+  // Button pulse effect
   useEffect(() => {
     const interval = setInterval(() => {
       setButtonPulse(prev => !prev);
     }, 2000);
     return () => clearInterval(interval);
   }, []);
+
+  // Use about data or fallback to defaults
+  const displayData = aboutData || defaultAboutData;
+
+  if (isLoading && !aboutData) {
+    return (
+      <section 
+        ref={aboutRef}
+        className={`relative w-full min-h-screen flex flex-col overflow-hidden transition-colors duration-700 ${
+          isDark 
+            ? 'bg-gray-900' 
+            : 'bg-gradient-to-br from-[#fafaf9] via-[#f8f9fa] to-[#f0fdf4]'
+        }`}
+      >
+        <div className="relative z-20 flex-1 flex items-center justify-center">
+          <div className={`text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>Loading...</div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section 
@@ -76,7 +240,7 @@ export default function About({ parallaxOffset, isDark, onNavigateToAbout }) {
               {/* Lottie Animation */}
               <div className="relative w-full h-full flex items-center justify-center z-10">
                 <DotLottieReact
-                  src="https://lottie.host/05b0936a-e537-4168-ba9f-6dfe891a169b/5b4X2kO7xR.lottie"
+                  src={displayData.animationUrl}
                   loop
                   autoplay
                   className="w-full h-full max-w-full"
@@ -97,7 +261,7 @@ export default function About({ parallaxOffset, isDark, onNavigateToAbout }) {
                   }`} 
                   style={{ fontFamily: "'Outfit', sans-serif" }}
                 >
-                  About <span style={{ color: '#6E260E' }}>Imfuyo</span>
+                  {displayData.title.split(' ').slice(0, -1).join(' ')} <span style={{ color: '#6E260E' }}>{displayData.title.split(' ').slice(-1)}</span>
                 </h2>
                 <div className={`h-1.5 w-20 rounded-full bg-gradient-to-r from-[#40916c] to-emerald-500`}></div>
               </div>
@@ -109,7 +273,7 @@ export default function About({ parallaxOffset, isDark, onNavigateToAbout }) {
                 }`} 
                 style={{ fontFamily: "'Outfit', sans-serif" }}
               >
-                Imfuyo is a pioneering agricultural fintech platform bridging smallholder farmers and modern financial services across Africa. Through innovative solutions and data-driven technology, we empower farmers with the capital and tools they need to increase yields, build sustainable practices, and create lasting prosperity for their communities.
+                {displayData.description}
               </p>
 
               {/* CTA Button */}
@@ -138,6 +302,17 @@ export default function About({ parallaxOffset, isDark, onNavigateToAbout }) {
           </div>
         </div>
       </div>
+
+      <style>{`
+        @keyframes drift {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          50% { transform: translate(30px, -30px) scale(1.1); }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 0.4; transform: scale(1); }
+          50% { opacity: 0.6; transform: scale(1.05); }
+        }
+      `}</style>
     </section>
   );
 }

@@ -1,12 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import { Facebook, Linkedin, Instagram, Phone, Mail, Send, MapPin, X } from 'lucide-react';
+import { Facebook, Linkedin, Instagram, Phone, Mail, Send, MapPin, X, CheckCircle, AlertCircle } from 'lucide-react';
+import { db } from '../../Libs/firebase-config.mjs';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 export default function Contact({ isDark }) {
   const [inView, setInView] = useState(false);
   const [hoveredSocial, setHoveredSocial] = useState(null);
   const [showContactForm, setShowContactForm] = useState(false);
   const [buttonHovered, setButtonHovered] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null); // 'success' or 'error'
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -84,14 +88,40 @@ export default function Contact({ isDark }) {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const mailtoLink = `mailto:info@imfuyo.com?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(
-      `Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`
-    )}`;
-    window.location.href = mailtoLink;
-    setShowContactForm(false);
-    setFormData({ name: '', email: '', subject: '', message: '' });
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+
+    try {
+      // Add message to Firestore
+      await addDoc(collection(db, 'messages'), {
+        name: formData.name,
+        email: formData.email,
+        subject: formData.subject,
+        message: formData.message,
+        timestamp: serverTimestamp(),
+        status: 'unread' // You can use this to track read/unread messages
+      });
+
+      // Show success message
+      setSubmitStatus('success');
+      
+      // Reset form
+      setFormData({ name: '', email: '', subject: '', message: '' });
+
+      // Close modal after 2 seconds
+      setTimeout(() => {
+        setShowContactForm(false);
+        setSubmitStatus(null);
+      }, 2000);
+
+    } catch (error) {
+      console.error('Error submitting message:', error);
+      setSubmitStatus('error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -288,7 +318,7 @@ export default function Contact({ isDark }) {
       {showContactForm && (
         <div 
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-          onClick={() => setShowContactForm(false)}
+          onClick={() => !isSubmitting && setShowContactForm(false)}
           style={{ animation: 'fadeIn 0.3s ease-out' }}
         >
           <div 
@@ -302,16 +332,42 @@ export default function Contact({ isDark }) {
           >
             {/* Close Button */}
             <button
-              onClick={() => setShowContactForm(false)}
+              onClick={() => !isSubmitting && setShowContactForm(false)}
+              disabled={isSubmitting}
               className={`absolute top-4 right-4 p-2 rounded-full transition-all duration-300 cursor-pointer ${
                 isDark 
                   ? 'hover:bg-white/10 text-gray-300' 
                   : 'hover:bg-gray-100 text-gray-600'
-              }`}
+              } ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
               type="button"
             >
               <X className="w-6 h-6" />
             </button>
+
+            {/* Success/Error Message */}
+            {submitStatus && (
+              <div className={`mb-4 p-4 rounded-xl flex items-center gap-3 ${
+                submitStatus === 'success' 
+                  ? 'bg-green-100 text-green-800 border border-green-200' 
+                  : 'bg-red-100 text-red-800 border border-red-200'
+              }`}>
+                {submitStatus === 'success' ? (
+                  <>
+                    <CheckCircle className="w-5 h-5" />
+                    <span style={{ fontFamily: "'Outfit', sans-serif" }}>
+                      Message sent successfully! We'll get back to you soon.
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <AlertCircle className="w-5 h-5" />
+                    <span style={{ fontFamily: "'Outfit', sans-serif" }}>
+                      Failed to send message. Please try again.
+                    </span>
+                  </>
+                )}
+              </div>
+            )}
 
             {/* Form Header */}
             <div className="mb-6">
@@ -349,12 +405,13 @@ export default function Contact({ isDark }) {
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
+                  disabled={isSubmitting}
                   required
                   className={`w-full px-4 py-3 rounded-xl border transition-all duration-300 focus:ring-2 focus:ring-[#40916c] focus:border-transparent ${
                     isDark 
                       ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
                       : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                  }`}
+                  } ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                   placeholder="John Doe"
                   style={{ fontFamily: "'Outfit', sans-serif" }}
                 />
@@ -374,12 +431,13 @@ export default function Contact({ isDark }) {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
+                  disabled={isSubmitting}
                   required
                   className={`w-full px-4 py-3 rounded-xl border transition-all duration-300 focus:ring-2 focus:ring-[#40916c] focus:border-transparent ${
                     isDark 
                       ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
                       : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                  }`}
+                  } ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                   placeholder="john@example.com"
                   style={{ fontFamily: "'Outfit', sans-serif" }}
                 />
@@ -399,12 +457,13 @@ export default function Contact({ isDark }) {
                   name="subject"
                   value={formData.subject}
                   onChange={handleInputChange}
+                  disabled={isSubmitting}
                   required
                   className={`w-full px-4 py-3 rounded-xl border transition-all duration-300 focus:ring-2 focus:ring-[#40916c] focus:border-transparent ${
                     isDark 
                       ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
                       : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                  }`}
+                  } ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                   placeholder="How can we help you?"
                   style={{ fontFamily: "'Outfit', sans-serif" }}
                 />
@@ -423,13 +482,14 @@ export default function Contact({ isDark }) {
                   name="message"
                   value={formData.message}
                   onChange={handleInputChange}
+                  disabled={isSubmitting}
                   required
                   rows={4}
                   className={`w-full px-4 py-3 rounded-xl border transition-all duration-300 focus:ring-2 focus:ring-[#40916c] focus:border-transparent resize-none ${
                     isDark 
                       ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
                       : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                  }`}
+                  } ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                   placeholder="Tell us more about your inquiry..."
                   style={{ fontFamily: "'Outfit', sans-serif" }}
                 />
@@ -437,13 +497,14 @@ export default function Contact({ isDark }) {
 
               <button
                 type="submit"
+                disabled={isSubmitting}
                 style={{
                   width: '100%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
-                  background: 'linear-gradient(to right, #40916c, #2d6a4f)',
+                  background: isSubmitting ? '#9ca3af' : 'linear-gradient(to right, #40916c, #2d6a4f)',
                   color: 'white',
                   padding: '14px 24px',
                   borderRadius: '12px',
@@ -451,19 +512,22 @@ export default function Contact({ isDark }) {
                   fontWeight: '600',
                   fontFamily: "'Outfit', sans-serif",
                   border: 'none',
-                  cursor: 'pointer',
-                  marginTop: '8px'
+                  cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                  marginTop: '8px',
+                  opacity: isSubmitting ? 0.7 : 1
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.02)';
-                  e.currentTarget.style.boxShadow = '0 20px 25px rgba(0,0,0,0.3)';
+                  if (!isSubmitting) {
+                    e.currentTarget.style.transform = 'scale(1.02)';
+                    e.currentTarget.style.boxShadow = '0 20px 25px rgba(0,0,0,0.3)';
+                  }
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'scale(1)';
                   e.currentTarget.style.boxShadow = '';
                 }}
               >
-                <span>Send Message</span>
+                <span>{isSubmitting ? 'Sending...' : 'Send Message'}</span>
                 <Send className="w-5 h-5" />
               </button>
             </form>

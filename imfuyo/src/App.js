@@ -7,6 +7,7 @@ import WhatWeDo from './components/WhatWeDo';
 import OurImpact from './components/OurImpact';
 import Shop from './components/Shop';
 import AIConsulting from './components/AIConsulting';
+import Members from './components/Members';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Loading from './components/Loading';
@@ -233,6 +234,11 @@ function App() {
     handleNavigation('aiconsulting');
   };
 
+  // Navigate to Members page
+  const navigateToMembers = () => {
+    handleNavigation('members');
+  };
+
   // Handle WhatsApp click
   const handleWhatsAppClick = () => {
     window.open('https://wa.me/254700000000?text=Hello%20Imfuyo!%20I%20have%20a%20question', '_blank');
@@ -296,6 +302,7 @@ function App() {
           <CommunityBlogs 
             isDark={isDark}
             onBack={navigateToHome}
+            onNavigate={handleNavigation}
           />
         )}
 
@@ -303,6 +310,7 @@ function App() {
           <WhatWeDo 
             isDark={isDark}
             onBack={navigateToHome}
+            onNavigate={handleNavigation}
           />
         )}
 
@@ -310,6 +318,7 @@ function App() {
           <OurImpact 
             isDark={isDark}
             onBack={navigateToHome}
+            onNavigate={handleNavigation}
           />
         )}
 
@@ -317,6 +326,7 @@ function App() {
           <Shop 
             isDark={isDark}
             onBack={navigateToHome}
+            onNavigate={handleNavigation}
           />
         )}
 
@@ -324,13 +334,19 @@ function App() {
           <AIConsulting 
             isDark={isDark}
             onBack={navigateToHome}
+            onNavigate={handleNavigation}
+          />
+        )}
+
+        {currentPage === 'members' && (
+          <Members 
+            isDark={isDark}
+            onBack={navigateToHome}
           />
         )}
       </div>
 
       {/* Footer - Added to all pages */}
-      
-
       <Footer onNavigate={handleNavigation} />
 
       {/* Floating WhatsApp Button - Available on all pages */}
