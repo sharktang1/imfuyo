@@ -41,7 +41,7 @@ export default function Footer({ onNavigate }) {
                 className="flex items-center space-x-3 mb-4 group cursor-pointer"
               >
                 <img 
-                  src="https://res.cloudinary.com/dpymwa41m/image/upload/v1760774001/Facebook1_jjvwsz.jpg" 
+                  src="https://res.cloudinary.com/dpymwa41m/image/upload/v1761939036/Gemini_Generated_Image_b62mhwb62mhwb62m_s1dmj2.png" 
                   alt="Imfuyo Logo" 
                   className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg group-hover:scale-110 transition-transform duration-300"
                 />

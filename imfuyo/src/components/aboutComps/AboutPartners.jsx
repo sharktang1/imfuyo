@@ -85,175 +85,213 @@ export default function AboutPartnerships({ isActive, isDark }) {
 
   // Viewport detection
   useEffect(() => {
-    if (isActive) {
-      setInView(true);
-    }
+    const handleScroll = () => {
+      const section = sectionRef.current;
+      if (!section) return;
+      const rect = section.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      setInView(rect.top < windowHeight * 0.8 && rect.bottom > 0);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
   }, [isActive]);
 
   return (
-    <div 
-      className={`fixed inset-0 transition-all duration-1000 ease-out ${
-        isActive ? 'opacity-100 scale-100 blur-none pointer-events-auto' : 'opacity-0 scale-95 blur-lg pointer-events-none'
+    <section 
+      className={`relative w-full min-h-screen flex flex-col overflow-hidden transition-colors duration-700 ${
+        isDark ? 'bg-gray-900' : 'bg-gradient-to-br from-[#fafaf9] via-[#f8f9fa] to-[#f0fdf4]'
       }`}
       ref={sectionRef}
     >
-      <section className={`relative w-full h-screen flex flex-col overflow-hidden transition-colors duration-700 ${
-        isDark ? 'bg-gray-900' : 'bg-gradient-to-br from-[#fafaf9] via-[#f8f9fa] to-[#f0fdf4]'
-      }`}>
+      
+      {/* Animated Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className={`absolute top-1/4 left-1/3 w-96 h-96 rounded-full blur-3xl opacity-15 ${
+          isDark ? 'bg-emerald-600' : 'bg-emerald-200'
+        }`} style={{ animation: 'float 10s ease-in-out infinite' }}></div>
+        <div className={`absolute bottom-1/4 right-1/3 w-80 h-80 rounded-full blur-3xl opacity-10 ${
+          isDark ? 'bg-teal-600' : 'bg-teal-200'
+        }`} style={{ animation: 'float 12s ease-in-out infinite', animationDelay: '-5s' }}></div>
+      </div>
+
+      {/* Main Content */}
+      <div className="relative flex flex-col items-center justify-center h-full px-4 sm:px-6 lg:px-8 py-20">
         
-        {/* Animated Background */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className={`absolute top-1/4 left-1/3 w-96 h-96 rounded-full blur-3xl opacity-15 ${
-            isDark ? 'bg-emerald-600' : 'bg-emerald-200'
-          }`} style={{ animation: 'float 10s ease-in-out infinite' }}></div>
-          <div className={`absolute bottom-1/4 right-1/3 w-80 h-80 rounded-full blur-3xl opacity-10 ${
-            isDark ? 'bg-teal-600' : 'bg-teal-200'
-          }`} style={{ animation: 'float 12s ease-in-out infinite', animationDelay: '-5s' }}></div>
+        {/* Header */}
+        <div className={`text-center mb-16 transform transition-all duration-1000 ${
+          inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+        }`}>
+          <div className="flex items-center justify-center space-x-3 mb-4">
+            <Handshake className={`w-8 h-8 ${
+              isDark ? 'text-emerald-400' : 'text-emerald-600'
+            }`} strokeWidth={2.5} />
+            <h2 
+              className={`text-4xl sm:text-5xl lg:text-6xl font-black ${
+                isDark ? 'text-white' : 'text-gray-900'
+              }`}
+              style={{ fontFamily: "'Outfit', sans-serif" }}
+            >
+              Our Partners
+            </h2>
+          </div>
+          <p 
+            className={`text-lg sm:text-xl max-w-2xl mx-auto ${
+              isDark ? 'text-gray-300' : 'text-gray-700'
+            }`}
+            style={{ fontFamily: "'Outfit', sans-serif" }}
+          >
+            Collaborating with industry leaders to drive agricultural transformation across Africa
+          </p>
         </div>
 
-        {/* Main Content */}
-        <div className="relative z-[60] flex flex-col items-center justify-center h-full px-4 sm:px-6 lg:px-8">
-          
-          {/* Header */}
-          <div className={`text-center mb-20 transform transition-all duration-1000 ${
-            inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}>
-            <div className="flex items-center justify-center space-x-3">
-              <Handshake className={`w-8 h-8 ${
-                isDark ? 'text-emerald-400' : 'text-emerald-600'
-              }`} strokeWidth={2.5} />
-              <h2 
-                className={`text-4xl sm:text-5xl lg:text-6xl font-black ${
-                  isDark ? 'text-white' : 'text-gray-900'
-                }`}
-                style={{ fontFamily: "'Outfit', sans-serif" }}
-              >
-                Our Partners
-              </h2>
-            </div>
-          </div>
-
-          {/* Infinite Scrolling Partners */}
-          <div className={`w-full max-w-7xl transition-all duration-1000 delay-200 ${
-            inView ? 'opacity-100' : 'opacity-0'
-          }`} data-no-scroll>
-            {/* Loading State */}
-            {!imagesLoaded && (
-              <div className="flex items-center justify-center py-20">
-                <div className="animate-pulse">
-                  <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-                </div>
+        {/* Infinite Scrolling Partners */}
+        <div className={`w-full max-w-7xl transition-all duration-1000 delay-200 ${
+          inView ? 'opacity-100' : 'opacity-0'
+        }`} data-no-scroll>
+          {/* Loading State */}
+          {!imagesLoaded && (
+            <div className="flex items-center justify-center py-20">
+              <div className="animate-pulse">
+                <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Scrolling Container */}
-            {imagesLoaded && (
+          {/* Scrolling Container */}
+          {imagesLoaded && (
+            <div 
+              className="relative overflow-hidden py-8"
+              data-no-scroll
+            >
+              {/* Gradient Masks */}
+              <div className={`absolute left-0 top-0 bottom-0 w-32 z-10 pointer-events-none ${
+                isDark 
+                  ? 'bg-gradient-to-r from-gray-900 to-transparent' 
+                  : 'bg-gradient-to-r from-[#fafaf9] to-transparent'
+              }`}></div>
+              <div className={`absolute right-0 top-0 bottom-0 w-32 z-10 pointer-events-none ${
+                isDark 
+                  ? 'bg-gradient-to-l from-gray-900 to-transparent' 
+                  : 'bg-gradient-to-l from-[#fafaf9] to-transparent'
+              }`}></div>
+
+              {/* Scrolling Track */}
               <div 
-                className="relative overflow-hidden py-8"
+                ref={scrollRef}
+                className="flex space-x-8 animate-scroll"
                 data-no-scroll
+                style={{ 
+                  width: 'max-content',
+                  willChange: 'transform'
+                }}
               >
-                {/* Gradient Masks */}
-                <div className={`absolute left-0 top-0 bottom-0 w-32 z-10 pointer-events-none ${
-                  isDark 
-                    ? 'bg-gradient-to-r from-gray-900 to-transparent' 
-                    : 'bg-gradient-to-r from-[#fafaf9] to-transparent'
-                }`}></div>
-                <div className={`absolute right-0 top-0 bottom-0 w-32 z-10 pointer-events-none ${
-                  isDark 
-                    ? 'bg-gradient-to-l from-gray-900 to-transparent' 
-                    : 'bg-gradient-to-l from-[#fafaf9] to-transparent'
-                }`}></div>
-
-                {/* Scrolling Track */}
-                <div 
-                  ref={scrollRef}
-                  className="flex space-x-8 animate-scroll"
-                  data-no-scroll
-                  style={{ 
-                    width: 'max-content',
-                    willChange: 'transform'
-                  }}
-                >
-                  {duplicatedPartners.map((partner, index) => (
-                    <div
-                      key={`${partner.id}-${index}`}
-                      className="flex-shrink-0 flex flex-col items-center"
+                {duplicatedPartners.map((partner, index) => (
+                  <div
+                    key={`${partner.id}-${index}`}
+                    className="flex-shrink-0 flex flex-col items-center"
+                    data-no-scroll
+                  >
+                    {/* Partner Card */}
+                    <div 
+                      className={`relative w-80 h-52 rounded-2xl overflow-hidden backdrop-blur-xl ${
+                        isDark 
+                          ? 'bg-gray-800/50 border-2 border-gray-700/50 shadow-xl shadow-black/20' 
+                          : 'bg-white/90 border-2 border-white/50 shadow-lg'
+                      }`}
                       data-no-scroll
                     >
-                      {/* Partner Card */}
-                      <div 
-                        className={`relative w-80 h-52 rounded-2xl overflow-hidden backdrop-blur-xl ${
-                          isDark 
-                            ? 'bg-gray-800/50 border-2 border-gray-700/50 shadow-xl shadow-black/20' 
-                            : 'bg-white/90 border-2 border-white/50 shadow-lg'
-                        }`}
-                        data-no-scroll
-                      >
-                        {/* Partner Logo */}
-                        <div className="absolute inset-0 flex items-center justify-center p-8" data-no-scroll>
-                          <img 
-                            src={partner.image}
-                            alt={partner.name}
-                            loading="lazy"
-                            decoding="async"
-                            className="max-w-full max-h-full object-contain"
-                            style={{ 
-                              filter: isDark ? 'brightness(1.3) contrast(1.15) saturate(1.1)' : 'brightness(1) contrast(1.05)'
-                            }}
-                            draggable="false"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Partner Name Below */}
-                      <div className="mt-4 text-center">
-                        <h3 
-                          className={`text-lg font-bold ${
-                            isDark ? 'text-white' : 'text-gray-900'
-                          }`}
-                          style={{ fontFamily: "'Outfit', sans-serif" }}
-                        >
-                          {partner.name}
-                        </h3>
+                      {/* Partner Logo */}
+                      <div className="absolute inset-0 flex items-center justify-center p-8" data-no-scroll>
+                        <img 
+                          src={partner.image}
+                          alt={partner.name}
+                          loading="lazy"
+                          decoding="async"
+                          className="max-w-full max-h-full object-contain"
+                          style={{ 
+                            filter: isDark ? 'brightness(1.3) contrast(1.15) saturate(1.1)' : 'brightness(1) contrast(1.05)'
+                          }}
+                          draggable="false"
+                        />
                       </div>
                     </div>
-                  ))}
-                </div>
+
+                    {/* Partner Name Below */}
+                    <div className="mt-4 text-center">
+                      <h3 
+                        className={`text-lg font-bold ${
+                          isDark ? 'text-white' : 'text-gray-900'
+                        }`}
+                        style={{ fontFamily: "'Outfit', sans-serif" }}
+                      >
+                        {partner.name}
+                      </h3>
+                      <p 
+                        className={`text-sm mt-1 ${
+                          isDark ? 'text-emerald-400' : 'text-emerald-600'
+                        }`}
+                        style={{ fontFamily: "'Outfit', sans-serif" }}
+                      >
+                        {partner.category}
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
-        {/* Styles */}
-        <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+        {/* Partnership Description */}
+        <div className={`mt-12 max-w-4xl mx-auto text-center transform transition-all duration-1000 delay-500 ${
+          inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+        }`}>
+          <div className={`p-6 rounded-2xl ${
+            isDark ? 'bg-white/5 border border-white/10' : 'bg-white/70 border border-white/50'
+          } backdrop-blur-xl`}>
+            <p 
+              className={`text-sm leading-relaxed ${
+                isDark ? 'text-gray-300' : 'text-gray-700'
+              }`}
+              style={{ fontFamily: "'Outfit', sans-serif" }}
+            >
+              Through strategic partnerships with financial institutions, technology providers, government agencies, and community organizations, we're building a comprehensive ecosystem that supports smallholder farmers at every stage of their journey. These collaborations enable us to scale our impact and deliver meaningful solutions across the agricultural value chain.
+            </p>
+          </div>
+        </div>
+      </div>
 
-          @keyframes float {
-            0%, 100% {
-              transform: translate(0, 0) rotate(0deg);
-            }
-            33% {
-              transform: translate(30px, -30px) rotate(5deg);
-            }
-            66% {
-              transform: translate(-20px, 20px) rotate(-5deg);
-            }
-          }
+      {/* Styles */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 
-          @keyframes scroll {
-            0% {
-              transform: translateX(0);
-            }
-            100% {
-              transform: translateX(calc(-100% / 3));
-            }
+        @keyframes float {
+          0%, 100% {
+            transform: translate(0, 0) rotate(0deg);
           }
+          33% {
+            transform: translate(30px, -30px) rotate(5deg);
+          }
+          66% {
+            transform: translate(-20px, 20px) rotate(-5deg);
+          }
+        }
 
-          .animate-scroll {
-            animation: scroll 40s linear infinite;
+        @keyframes scroll {
+          0% {
+            transform: translateX(0);
           }
-        `}</style>
-      </section>
-    </div>
+          100% {
+            transform: translateX(calc(-100% / 3));
+          }
+        }
+
+        .animate-scroll {
+          animation: scroll 40s linear infinite;
+        }
+      `}</style>
+    </section>
   );
 }

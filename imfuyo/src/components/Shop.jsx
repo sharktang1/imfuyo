@@ -151,6 +151,26 @@ const Shop = ({ isDark, onBack }) => {
         removeFromCart={removeFromCart} 
         isDark={isDark} 
       />
+
+      {/* Green Scrollbar Styles */}
+      <style>{`
+        ::-webkit-scrollbar {
+          width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+          background: ${isDark ? '#1f2937' : '#f3f4f6'};
+        }
+
+        ::-webkit-scrollbar-thumb {
+          background: #40916c;
+          border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+          background: #2d6a4f;
+        }
+      `}</style>
     </div>
   );
 };

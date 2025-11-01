@@ -346,8 +346,10 @@ function App() {
         )}
       </div>
 
-      {/* Footer - Added to all pages */}
-      <Footer onNavigate={handleNavigation} />
+      {/* Footer - Added to all pages except AI Consulting */}
+      {currentPage !== 'aiconsulting' && (
+        <Footer onNavigate={handleNavigation} />
+      )}
 
       {/* Floating WhatsApp Button - Available on all pages */}
       <FloatingWhatsAppButton 

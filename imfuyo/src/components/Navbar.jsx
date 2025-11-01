@@ -1,5 +1,5 @@
 import React from 'react';
-import { Moon, Sun, Menu, X, Heart, Store, Leaf } from 'lucide-react';
+import { Moon, Sun, Menu, X, Heart, Store, Leaf, Home } from 'lucide-react';
 
 const Navbar = ({ 
   currentPage,
@@ -12,10 +12,11 @@ const Navbar = ({
   activeSection
 }) => {
   const navItems = [
+    { name: 'Home', page: 'landing', icon: 'Home' },
     { name: 'About', page: 'about' },
     { name: 'What We Do', page: 'whatwedo' },
-    { name: 'Imfuyo Foundation', page: 'impact' },
-    { name: 'Shop', page: 'shop', icon: 'Store' }
+    { name: 'Imfuyo Foundation Inc', page: 'impact' },
+    { name: 'Market Place', page: 'shop', icon: 'Store' }
   ];
 
   const handleNavClick = (item) => {
@@ -80,9 +81,9 @@ const Navbar = ({
               onClick={() => onNavigate('landing')}
             >
               <img 
-                src="https://res.cloudinary.com/dof2wtgd6/image/upload/v1761537350/Logo_final_JPEG_-_no_tagline_qnsd2f.jpg" 
+                src="https://res.cloudinary.com/dpymwa41m/image/upload/v1761938559/Gemini_Generated_Image_b62mhwb62mhwb62m-removebg-preview_dhwqj1.png" 
                 alt="Imfuyo Logo" 
-                className="w-14 h-14 sm:w-16 sm:h-16 transform group-hover:scale-110 transition-transform duration-300"
+                className="w-16 h-16 sm:w-18 sm:h-18 transform group-hover:scale-110 transition-transform duration-300"
               />
             </div>
 
@@ -100,6 +101,7 @@ const Navbar = ({
                   style={{ fontFamily: "'Outfit', sans-serif" }}
                 >
                   {item.icon === 'Store' && <Store className="w-4 h-4" />}
+                  {item.icon === 'Home' && <Home className="w-4 h-4" />}
                   <span>{item.name}</span>
                   {isActive(item) && (
                     <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-[#40916c] rounded-full"></span>
@@ -123,7 +125,7 @@ const Navbar = ({
                 style={{ fontFamily: "'Outfit', sans-serif" }}
               >
                 <Heart className="w-4 h-4 sm:w-4 sm:h-4 fill-current" />
-                <span>Fund Us</span>
+                <span>Make A Donation</span>
               </button>
             </div>
 
@@ -182,9 +184,9 @@ const Navbar = ({
               }}
             >
               <img 
-                src="https://res.cloudinary.com/dof2wtgd6/image/upload/v1761537350/Logo_final_JPEG_-_no_tagline_qnsd2f.jpg" 
+                src="https://res.cloudinary.com/dpymwa41m/image/upload/v1761938559/Gemini_Generated_Image_b62mhwb62mhwb62m-removebg-preview_dhwqj1.png" 
                 alt="Imfuyo Logo" 
-                className="w-20 h-20 transform group-hover:scale-110 transition-transform duration-300"
+                className="w-25 h-25 transform group-hover:scale-110 transition-transform duration-300"
               />
             </div>
 
@@ -205,6 +207,7 @@ const Navbar = ({
                     style={{ fontFamily: "'Outfit', sans-serif" }}
                   >
                     {item.icon === 'Store' && <Store className="w-5 h-5" />}
+                    {item.icon === 'Home' && <Home className="w-5 h-5" />}
                     <span>{item.name}</span>
                   </span>
                 </button>
@@ -234,7 +237,7 @@ const Navbar = ({
               </button>
             </div>
 
-            {/* Fund Us Button */}
+            {/* Make A Donation Button */}
             <div className="pt-2">
               <button 
                 onClick={() => handleNavClick({ page: 'contact' })}
@@ -242,7 +245,7 @@ const Navbar = ({
                 style={{ fontFamily: "'Outfit', sans-serif" }}
               >
                 <Heart className="w-5 h-5 fill-current" />
-                <span>Fund Us</span>
+                <span>Make A Donation</span>
               </button>
             </div>
           </div>

@@ -28,9 +28,17 @@ export default function AboutTestimonials({ isActive, isDark, setIsVideoModalOpe
   ];
 
   useEffect(() => {
-    if (isActive) {
-      setInView(true);
-    }
+    const handleScroll = () => {
+      const section = sectionRef.current;
+      if (!section) return;
+      const rect = section.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      setInView(rect.top < windowHeight * 0.8 && rect.bottom > 0);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
   }, [isActive]);
 
   const handleVideoClick = (e, video) => {
@@ -56,9 +64,10 @@ export default function AboutTestimonials({ isActive, isDark, setIsVideoModalOpe
   };
 
   return (
-    <section className={`relative w-full h-screen flex flex-col overflow-hidden transition-colors duration-700 ${
-      isDark ? 'bg-gray-900' : 'bg-gradient-to-br from-[#fafaf9] via-[#f8f9fa] to-[#f0fdf4]'
-    }`}
+    <section 
+      className={`relative w-full min-h-screen flex flex-col overflow-hidden transition-colors duration-700 ${
+        isDark ? 'bg-gray-900' : 'bg-gradient-to-br from-[#fafaf9] via-[#f8f9fa] to-[#f0fdf4]'
+      }`}
       ref={sectionRef}
     >
       
@@ -73,20 +82,28 @@ export default function AboutTestimonials({ isActive, isDark, setIsVideoModalOpe
       </div>
 
       {/* Main Content */}
-      <div className="relative z-[60] flex flex-col items-center justify-center h-full px-4 sm:px-6 lg:px-8">
+      <div className="relative flex flex-col items-center justify-center h-full px-4 sm:px-6 lg:px-8 py-20">
         
         {/* Header */}
-        <div className={`text-center mb-8 transform transition-all duration-1000 ${
+        <div className={`text-center mb-16 transform transition-all duration-1000 ${
           inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
           <h2 
-            className={`text-4xl sm:text-5xl lg:text-6xl font-black ${
+            className={`text-4xl sm:text-5xl lg:text-6xl font-black mb-4 ${
               isDark ? 'text-white' : 'text-gray-900'
             }`}
             style={{ fontFamily: "'Outfit', sans-serif" }}
           >
             Testimonials
           </h2>
+          <p 
+            className={`text-lg sm:text-xl max-w-2xl mx-auto ${
+              isDark ? 'text-gray-300' : 'text-gray-700'
+            }`}
+            style={{ fontFamily: "'Outfit', sans-serif" }}
+          >
+            Hear directly from the farmers and partners whose lives we're transforming
+          </p>
         </div>
 
         {/* Video Grid */}
@@ -163,6 +180,32 @@ export default function AboutTestimonials({ isActive, isDark, setIsVideoModalOpe
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Additional Testimonial Content */}
+        <div className={`mt-12 max-w-4xl mx-auto transform transition-all duration-1000 delay-700 ${
+          inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+        }`}>
+          <div className={`p-6 rounded-2xl ${
+            isDark ? 'bg-white/5 border border-white/10' : 'bg-white/70 border border-white/50'
+          } backdrop-blur-xl`}>
+            <p 
+              className={`text-sm leading-relaxed text-center ${
+                isDark ? 'text-gray-300' : 'text-gray-700'
+              }`}
+              style={{ fontFamily: "'Outfit', sans-serif" }}
+            >
+              "The impact we're making goes beyond numbers. Every testimonial represents a life changed, a family empowered, and a community transformed. These stories fuel our mission to revolutionize African agriculture through accessible financial solutions and innovative technology."
+            </p>
+            <p 
+              className={`text-center mt-4 font-semibold ${
+                isDark ? 'text-emerald-400' : 'text-emerald-600'
+              }`}
+              style={{ fontFamily: "'Outfit', sans-serif" }}
+            >
+              — Imfuyo Team
+            </p>
           </div>
         </div>
       </div>

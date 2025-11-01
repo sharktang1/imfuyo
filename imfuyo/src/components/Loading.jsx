@@ -64,7 +64,7 @@ const Loading = ({ lottieLoaded }) => {
         {/* Logo/Brand */}
         <div className="absolute top-8 left-8 flex items-center space-x-3 group cursor-pointer">
           <img 
-            src="https://res.cloudinary.com/dpymwa41m/image/upload/v1760774001/Facebook1_jjvwsz.jpg" 
+            src="https://res.cloudinary.com/dpymwa41m/image/upload/v1761938559/Gemini_Generated_Image_b62mhwb62mhwb62m-removebg-preview_dhwqj1.png" 
             alt="Imfuyo Logo" 
             className="w-10 h-10 sm:w-12 sm:h-12 transform group-hover:scale-110 transition-transform duration-300"
           />
@@ -84,7 +84,7 @@ const Loading = ({ lottieLoaded }) => {
           <div className="relative w-full h-64 lg:h-96">
             {!showFallback ? (
               <DotLottieReact
-                src="https://lottie.host/68638530-e1e4-49f9-952a-1c3efcd7aeac/2hywu50vnf.lottie"
+                src="https://lottie.host/1b74bdf4-c29a-460f-98d7-717c3139db9d/ZCpGT3XD86.lottie"
                 loop
                 autoplay
                 className="w-full h-full"
